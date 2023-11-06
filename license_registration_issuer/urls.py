@@ -16,7 +16,13 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
+from license_registration_issuer.views import RegisterView, AddEmployeeView, RemoveEmployeeView, UpdateDurationView
+
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('register/', RegisterView.as_view()),
+    path('add_employee/', AddEmployeeView.as_view()),
+    path('remove_employee/', RemoveEmployeeView.as_view()),
+    path('update_duration/', UpdateDurationView.as_view()),
 ]

@@ -25,18 +25,18 @@ env = environ.Env(
     DEBUG=(bool, False)
 )
 
-DEBUG = env.get_value('DEBUG', bool, False)
+DEBUG = env.get_value('DEBUG', bool, True)
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = env.get_value('SECRET_KEY', str, 'django-insecure-b6%@==j2_fn&mga5b!=u*u$6y@7*as&d5tw1!8ue*lp_x=*c0p')
 # SECURITY WARNING: don't run with debug turned on in production!
-ALLOWED_HOSTS = env.list('ALLOWED_HOSTS')
-CSRF_TRUSTED_ORIGINS = env.list('CSRF_TRUSTED_ORIGINS')
+ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', list, [])
+CSRF_TRUSTED_ORIGINS = env.list('CSRF_TRUSTED_ORIGINS', list, [])
 
 # CORS
-CORS_ALLOWED_ORIGINS = env.list('CORS_ALLOWED_ORIGINS')
+CORS_ALLOWED_ORIGINS = env.list('CORS_ALLOWED_ORIGINS', list, [])
 CORS_ALLOW_CREDENTIALS = True
 CORS_ORIGIN_ALLOW_ALL = True
-CORS_ORIGIN_WHITELIST = env.list('CORS_ORIGIN_WHITELIST')
+CORS_ORIGIN_WHITELIST = env.list('CORS_ORIGIN_WHITELIST', list, [])
 CORS_ALLOW_METHODS = [
     'DELETE',
     'GET',
@@ -56,7 +56,6 @@ CORS_ALLOW_HEADERS = [
     'x-csrftoken',
     'x-requested-with',
 ]
-
 
 # Application definition
 
@@ -99,7 +98,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'license_registration_issuer.wsgi.application'
 
-
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
@@ -109,7 +107,6 @@ DATABASES = {
         'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
@@ -129,7 +126,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
 
@@ -141,7 +137,6 @@ USE_I18N = True
 
 USE_TZ = True
 
-
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
@@ -151,7 +146,6 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
 
 # Logging
 LOGGING = {
@@ -181,7 +175,7 @@ CELERY_TASK_TRACK_STARTED = True
 CELERY_TASK_TIME_LIMIT = 30 * 60
 CELERYD_CONCURRENCY = 1
 CELERY_WORKER_CONCURRENCY = 1
-CELERY_BROKER_URL = env.get_value('CELERY_BROKER_URL', str, 'localhost')
+CELERY_BROKER_URL = env.get_value('CELERY_BROKER_URL', str, 'amqp://guest:guest@localhost:5672')
 
 CELERY_TASK_DEFAULT_EXCHANGE = env.get_value('CELERY_TASK_DEFAULT_EXCHANGE', str, 'cirs_exchange')
 CELERY_TASK_DEFAULT_ROUTING_KEY = env.get_value('CELERY_TASK_DEFAULT_ROUTING_KEY', str, 'cirs_key')
@@ -199,3 +193,5 @@ EVIDENCE_REGISTRATION_ADDRESS = env.get_value('EVIDENCE_REGISTRATION_ADDRESS', s
                                               '0x13C75Dac152781F22A23d2B8E40fCA81035bD658')
 GAS_FEE_GWEI = env.get_value('GAS_FEE_GWEI', int, 700)
 DEFAULT_GAS_LIMIT = env.get_value('DEFAULT_GAS_LIMIT', int, 2000000)
+ISSUER_ADDRESS = env.get_value('ISSUER_ADDRESS', str, '')
+ISSUER_PK = env.get_value('ISSUER_PK', str, '')
