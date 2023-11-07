@@ -21,8 +21,8 @@ from license_registration_issuer.views import RegisterView, AddEmployeeView, Rem
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('register/', RegisterView.as_view()),
-    path('add_employee/', AddEmployeeView.as_view()),
-    path('remove_employee/', RemoveEmployeeView.as_view()),
-    path('update_duration/', UpdateDurationView.as_view()),
+    path('api/register', RegisterView.as_view()),
+    path('api/add_employee', AddEmployeeView.as_view()),
+    path('api/remove_employee', RemoveEmployeeView.as_view()),
+    path('api/update_duration', UpdateDurationView.as_view()),
 ]
