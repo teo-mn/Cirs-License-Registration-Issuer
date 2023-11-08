@@ -91,6 +91,7 @@ class Issuer:
                      license_id: str,
                      requirement_id: str,
                      evidence_id: str,
+                     additional_data_id: str,
                      issuer_address: str,
                      pk: str):
         nonce = self.__client.eth.get_transaction_count(self.__client.to_checksum_address(issuer_address))
@@ -98,7 +99,8 @@ class Issuer:
             func = self.__requirement_contract.functions.registerEvidence(
                 license_id.encode('utf-8'),
                 requirement_id.encode('utf-8'),
-                evidence_id.encode('utf-8')
+                evidence_id.encode('utf-8'),
+                additional_data_id.encode('utf-8')
             )
             return self.__tx_send(func, issuer_address, nonce, pk)
 

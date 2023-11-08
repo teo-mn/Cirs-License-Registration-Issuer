@@ -14,9 +14,20 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+import json
+
 from django.contrib import admin
+from django.http import HttpResponse
 from django.urls import path
-from license_registration_issuer.views import RegisterView, AddEmployeeView, RemoveEmployeeView, UpdateDurationView
+from rest_framework import generics
+
+from license_registration_issuer.views import RegisterView, AddEmployeeView, RemoveEmployeeView, UpdateView
+
+
+class TestView(generics.GenericAPIView):
+    def post(self, request):
+        print(json.dumps(request.data))
+        return HttpResponse(json.dumps(request.data), headers={"Content-Type": "application/json"})
 
 
 urlpatterns = [
@@ -24,5 +35,6 @@ urlpatterns = [
     path('api/register', RegisterView.as_view()),
     path('api/add_employee', AddEmployeeView.as_view()),
     path('api/remove_employee', RemoveEmployeeView.as_view()),
-    path('api/update_duration', UpdateDurationView.as_view()),
+    path('api/update', UpdateView.as_view()),
+    path('test', TestView.as_view())
 ]

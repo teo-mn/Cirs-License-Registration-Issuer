@@ -7,9 +7,12 @@ from jsonschema import ValidationError
 from rest_framework import generics
 
 from license_registration_issuer.models import Request, RequestType
+from license_registration_issuer.schemas.add_employee import AddEmployeeSchema
 from license_registration_issuer.schemas.register import RegisterSchema
+from license_registration_issuer.schemas.remove_employee import RemoveEmployeeSchema
+from license_registration_issuer.schemas.update import UpdateSchema
 from license_registration_issuer.validate import parse_error_message, CustomValidator
-from license_registration_issuer.tasks import register_task
+from license_registration_issuer.tasks import register_task, add_employee_task, remove_employee_task, update_task
 
 
 class BasicView(generics.GenericAPIView):
@@ -60,19 +63,22 @@ class RegisterView(BasicView):
         register_task.delay(request_id)
 
 
-class UpdateDurationView(BasicView):
+class UpdateView(BasicView):
+    JSONSchema = UpdateSchema
 
     def add_to_queue(self, request_id):
-        pass
+        update_task.delay(request_id)
 
 
 class AddEmployeeView(BasicView):
+    JSONSchema = AddEmployeeSchema
 
     def add_to_queue(self, request_id):
-        pass
+        add_employee_task.delay(request_id)
 
 
 class RemoveEmployeeView(BasicView):
+    JSONSchema = RemoveEmployeeSchema
 
     def add_to_queue(self, request_id):
-        pass
+        remove_employee_task.delay(request_id)

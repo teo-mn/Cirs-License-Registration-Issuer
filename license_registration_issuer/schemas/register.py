@@ -1,6 +1,6 @@
 RegisterSchema = {
     "type": "object",
-    "description": "Автомашины зээлийн өгөдлийн схем",
+    "description": "ТЗ бүртгэх хүсэлтийн схем",
     "properties": {
         "payload": {
             "type": "object",
@@ -29,6 +29,10 @@ RegisterSchema = {
                 "owner_name": {
                     "type": "string",
                     "description": "Тусгай зөвшөөрөл эзэмшигч ААН -н нэр",
+                },
+                "description": {
+                    "type": "string",
+                    "description": "Тайлбар /нэмэлт мэдээлэл/"
                 },
                 "state": {
                     "type": "number",
