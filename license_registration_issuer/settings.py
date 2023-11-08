@@ -66,7 +66,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'license_registration_issuer'
+    'license_registration_issuer',
+    'django_celery_beat',
 ]
 
 MIDDLEWARE = [
@@ -181,6 +182,7 @@ CELERY_BROKER_URL = env.get_value('CELERY_BROKER_URL', str, 'amqp://guest:guest@
 CELERY_TASK_DEFAULT_EXCHANGE = env.get_value('CELERY_TASK_DEFAULT_EXCHANGE', str, 'cirs_exchange')
 CELERY_TASK_DEFAULT_ROUTING_KEY = env.get_value('CELERY_TASK_DEFAULT_ROUTING_KEY', str, 'cirs_key')
 CELERY_TASK_DEFAULT_QUEUE = env.get_value('CELERY_TASK_DEFAULT_QUEUE', str, 'cirs_queue')
+SYNCER_CRON_JOB_MINUTE = env.get_value('SYNCER_CRON_JOB_MINUTE', str, '*/3')
 
 # blockchain
 NODE_URL = env.get_value('NODE_URL', str, 'https://node-testnet.corexchain.io')

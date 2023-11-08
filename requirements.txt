@@ -6,3 +6,5 @@ jsonschema==4.19.2
 django-environ==0.9.0
 verify4py==1.2.1
 requests~=2.31.0
+
+django_celery_beat==2.5.0

@@ -99,12 +99,12 @@ class RegisterHandler:
 
     def issue_employee(self, employee: dict, license_id: str, requirement_id: str):
         regnum_hash = calc_hash_str(json_wrap({"regnum": employee["regnum"]}))
-        employee_hash = json_wrap({"regnum": employee["regnum"],
-                                   "last_name": employee["last_name"],
-                                   "first_name": employee["first_name"],
-                                   "profession": employee["profession"],
-                                   "degree": employee["degree"]
-                                   })
+        employee_hash = calc_hash_str(json_wrap({"regnum": employee["regnum"],
+                                                 "last_name": employee["last_name"],
+                                                 "first_name": employee["first_name"],
+                                                 "profession": employee["profession"],
+                                                 "degree": employee["degree"]
+                                                 }))
         tx, error = self.issuer.set_data(regnum_hash, employee_hash, ISSUER_ADDRESS, ISSUER_PK)
         if error != '' and error is not None:
             self.has_error = True

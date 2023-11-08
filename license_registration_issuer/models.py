@@ -27,3 +27,9 @@ class Request(models.Model):
     )
     callback_url = models.CharField(max_length=256, blank=True)
     data = models.CharField(max_length=2048, default='')
+
+
+class LatestSyncedBlock(models.Model):
+    last_synced_block_kv = models.IntegerField(default=-1)
+    last_synced_block_license = models.IntegerField(default=-1)
+    last_synced_block_requirement = models.IntegerField(default=-1)

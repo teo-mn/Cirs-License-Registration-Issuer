@@ -20,7 +20,6 @@ from django.contrib import admin
 from django.http import HttpResponse
 from django.urls import path
 from rest_framework import generics
-
 from license_registration_issuer.views import RegisterView, AddEmployeeView, RemoveEmployeeView, UpdateView
 
 
@@ -28,6 +27,9 @@ class TestView(generics.GenericAPIView):
     def post(self, request):
         print(json.dumps(request.data))
         return HttpResponse(json.dumps(request.data), headers={"Content-Type": "application/json"})
+
+    def get(self, request):
+        return HttpResponse('')
 
 
 urlpatterns = [
