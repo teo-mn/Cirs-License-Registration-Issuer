@@ -1,22 +1,61 @@
 import logging
 
 from web3 import Web3
+from web3.types import BlockData, EventData
 
-from license_registration_issuer.models import LatestSyncedBlock
+from license_registration_issuer.models import LatestSyncedBlock, EventLog, EventType
 from license_registration_issuer.settings import NODE_URL_WS, KV_ADDRESS, \
     REQUIREMENT_REGISTRATION_ADDRESS, LICENSE_REGISTRATION_ADDRESS
 from blockchain.abi.key_value_abi import kv_abi
 from blockchain.abi.license_abi import license_abi
 from blockchain.abi.requirement_abi import requirement_abi
+
 logger = logging.getLogger(__name__)
 
 
-def handle_event(event: dict):
-    print(event['args'])
-    print(event['event'])
-    print(event['transactionHash'])
-    print(event['address'])
-    # TODO save db
+def handle_event(event: EventData, block: BlockData):
+    if EventLog.objects.filter(tx=event['transactionHash'].hex(),
+                               log_type=EventType.from_name(event['event'])).count() > 0:
+        instance = EventLog.objects.get(tx=event['transactionHash'].hex(), log_type=EventType.from_name(event['event']))
+    else:
+        instance = EventLog.objects.create(
+            tx=event['transactionHash'].hex(),
+            block_number=block['number'],
+            log_type=EventType.from_name(event['event']),
+            timestamp=block['timestamp'],
+        )
+    if instance.log_type == EventType.SET_DATA:
+        instance.key = event['args']['key'].decode()
+        instance.value = event['args']['value'].decode()
+    elif instance.log_type == EventType.LICENSE_REGISTERED:
+        instance.license_id = event['args']['licenseID'].decode()
+        instance.license_name = event['args']['licenseName'].decode()
+        instance.owner_id = event['args']['ownerID'].decode()
+        instance.owner_name = event['args']['ownerName'].decode()
+        instance.start_date = event['args']['startDate']
+        instance.end_date = event['args']['startDate']
+    elif instance.log_type == EventType.LICENSE_REVOKED:
+        instance.license_id = event['args']['licenseID'].decode()
+        instance.additional_data = event['args']['additionalData'].decode()
+    elif instance.log_type == EventType.REQUIREMENT_REGISTERED:
+        instance.license_id = event['args']['licenseID'].decode()
+        instance.requirement_id = event['args']['requirementID'].decode()
+        instance.requirement_name = event['args']['requirementName'].decode()
+    elif instance.log_type == EventType.REQUIREMENT_REVOKED:
+        instance.license_id = event['args']['licenseID'].decode()
+        instance.requirement_id = event['args']['requirementID'].decode()
+        instance.additional_data = event['args']['additionalData'].decode()
+    elif instance.log_type == EventType.EVIDENCE_REGISTERED:
+        instance.license_id = event['args']['licenseID'].decode()
+        instance.requirement_id = event['args']['requirementID'].decode()
+        instance.evidence_id = event['args']['evidenceID'].decode()
+        instance.additional_data = event['args']['additionalData'].decode()
+    elif instance.log_type == EventType.EVIDENCE_REVOKED:
+        instance.license_id = event['args']['licenseID'].decode()
+        instance.requirement_id = event['args']['requirementID'].decode()
+        instance.evidence_id = event['args']['evidenceID'].decode()
+        instance.additional_data = event['args']['additionalData'].decode()
+    instance.save()
 
 
 class KvSyncer:
@@ -67,7 +106,8 @@ class KvSyncer:
                     toBlock=self.web3.to_hex(to_block)
                 )
                 for event in event_filter.get_all_entries():
-                    handle_event(event)
+                    block = self.web3.eth.get_block(event['blockNumber'])
+                    handle_event(event, block)
 
             self.save_block_number(to_block)
             if to_block == last_block:
