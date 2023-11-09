@@ -100,7 +100,7 @@ class RegisterHandler:
     def issue_employee(self, employee: dict, license_id: str, requirement_id: str):
         regnum_hash = calc_hash_str(json_wrap({"regnum": employee["regnum"]}))
         if employee['state'] == 0:
-            logger.info('[evidence] Issuing id: ' + employee['regnum_hash'])
+            logger.info('[evidence] Issuing id: ' + regnum_hash)
             employee_hash = calc_hash_str(json_wrap({"regnum": employee["regnum"],
                                                      "last_name": employee["last_name"],
                                                      "first_name": employee["first_name"],
