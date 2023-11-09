@@ -20,6 +20,9 @@ from django.contrib import admin
 from django.http import HttpResponse
 from django.urls import path
 from rest_framework import generics
+
+from blockchain.balance import get_balance
+from license_registration_issuer.settings import ISSUER_ADDRESS
 from license_registration_issuer.views import RegisterView, AddEmployeeView, RemoveEmployeeView, UpdateView
 
 
@@ -32,11 +35,19 @@ class TestView(generics.GenericAPIView):
         return HttpResponse('')
 
 
+class AddressView(generics.GenericAPIView):
+
+    def get(self, request):
+        data = json.dumps({'address': ISSUER_ADDRESS, 'balance': get_balance(ISSUER_ADDRESS)})
+        return HttpResponse(data, headers={"Content-Type": "application/json"})
+
+
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/register', RegisterView.as_view()),
     path('api/add_employee', AddEmployeeView.as_view()),
     path('api/remove_employee', RemoveEmployeeView.as_view()),
     path('api/update', UpdateView.as_view()),
+    path('api/address', AddressView.as_view()),
     path('test', TestView.as_view())
 ]
