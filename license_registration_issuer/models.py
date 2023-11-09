@@ -71,6 +71,7 @@ class EventLog(models.Model):
         choices=EventType.choices,
         max_length=32)
     block_number = models.IntegerField()
+    contract_address = models.CharField(max_length=128)
     timestamp = models.IntegerField()
     license_id = models.CharField(max_length=1024, default='', blank=True)
     license_name = models.CharField(max_length=1024, default='', blank=True)

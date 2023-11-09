@@ -99,38 +99,42 @@ class RegisterHandler:
 
     def issue_employee(self, employee: dict, license_id: str, requirement_id: str):
         regnum_hash = calc_hash_str(json_wrap({"regnum": employee["regnum"]}))
-        employee_hash = calc_hash_str(json_wrap({"regnum": employee["regnum"],
-                                                 "last_name": employee["last_name"],
-                                                 "first_name": employee["first_name"],
-                                                 "profession": employee["profession"],
-                                                 "degree": employee["degree"]
-                                                 }))
-        tx, error = self.issuer.set_data(regnum_hash, employee_hash, ISSUER_ADDRESS, ISSUER_PK)
-        if error != '' and error is not None:
-            self.has_error = True
-            logger.error('Error occurred: ' + str(id))
-            logger.error(error)
-            return False
+        if employee['state'] == 0:
+            logger.info('[evidence] Issuing id: ' + employee['regnum_hash'])
+            employee_hash = calc_hash_str(json_wrap({"regnum": employee["regnum"],
+                                                     "last_name": employee["last_name"],
+                                                     "first_name": employee["first_name"],
+                                                     "profession": employee["profession"],
+                                                     "degree": employee["degree"]
+                                                     }))
+            tx, error = self.issuer.set_data(regnum_hash, employee_hash, ISSUER_ADDRESS, ISSUER_PK)
+            if error != '' and error is not None:
+                self.has_error = True
+                logger.error('Error occurred: ' + str(id))
+                logger.error(error)
+                return False
+            else:
+                logger.info('[kv] Issued on blockchain with tx: ' + str(tx))
+            tx, error = self.issuer.set_evidence(
+                license_id,
+                requirement_id,
+                regnum_hash,
+                '' if 'description' not in employee else employee['description'],
+                ISSUER_ADDRESS,
+                ISSUER_PK
+            )
+            if error != '' and error is not None:
+                logger.error('Error occurred: ' + str(id))
+                logger.error(error)
+                self.has_error = True
+                return False
+            else:
+                logger.info('[evidence] Issued on blockchain with tx: ' + str(tx))
+            employee['state'] = 1
+            self.instance.data = json.dumps(self.data)
+            self.instance.save()
         else:
-            logger.info('[kv] Issued on blockchain with tx: ' + str(tx))
-        tx, error = self.issuer.set_evidence(
-            license_id,
-            requirement_id,
-            regnum_hash,
-            '' if 'description' not in employee else employee['description'],
-            ISSUER_ADDRESS,
-            ISSUER_PK
-        )
-        if error != '' and error is not None:
-            logger.error('Error occurred: ' + str(id))
-            logger.error(error)
-            self.has_error = True
-            return False
-        else:
-            logger.info('[evidence] Issued on blockchain with tx: ' + str(tx))
-        employee['state'] = 1
-        self.instance.data = json.dumps(self.data)
-        self.instance.save()
+            logger.info('[evidence] Skipping id: ' + regnum_hash)
         return True
 
     def handle(self):

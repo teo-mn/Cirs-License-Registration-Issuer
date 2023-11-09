@@ -189,10 +189,10 @@ NODE_URL = env.get_value('NODE_URL', str, 'https://node-testnet.corexchain.io')
 NODE_URL_WS = env.get_value('NODE_URL_WS', str, 'ws://157.245.49.81:18546')  # ws://34.124.146.188:18546
 CHAIN_ID = env.get_value('CHAIN_ID', int, 3305)
 LICENSE_REGISTRATION_ADDRESS = env.get_value('LICENSE_REGISTRATION_ADDRESS', str,
-                                             '0x1cd8F973172460B1BFdBf76eb5430Dc00a4866E4')
+                                             '0x6c4d4A9CCf42Adb52336872c8AD719dCA557763D')
 REQUIREMENT_REGISTRATION_ADDRESS = env.get_value('REQUIREMENT_REGISTRATION_ADDRESS', str,
-                                                 '0x7b5f6eEf1205aC0a578CF6442B79bD8937AAabfd')
-KV_ADDRESS = env.get_value('KV_ADDRESS', str, '0x13C75Dac152781F22A23d2B8E40fCA81035bD658')
+                                                 '0xff68A90c6A3D7F9FCdBEAe043167fBB4171d5e64')
+KV_ADDRESS = env.get_value('KV_ADDRESS', str, '0xA76D11E077FE691Cf9e27639c1AFf96a15B3D9EE')
 GAS_FEE_GWEI = env.get_value('GAS_FEE_GWEI', int, 700)
 DEFAULT_GAS_LIMIT = env.get_value('DEFAULT_GAS_LIMIT', int, 2000000)
 ISSUER_ADDRESS = env.get_value('ISSUER_ADDRESS', str, '0x85F5c799e1edEe7Fc042638D5c00da3a5cC8c7a4')
