@@ -1,4 +1,6 @@
-# Schema Docs
+# ТЗ сунгалт хийх хүсэлтийн схем
+
+**Description:** Тусгай зөвшөөрлийн сунгалт /Хүчинтэй хугацаа сунгах/
 
 - [1. Property `root > payload`](#payload)
   - [1.1. Property `root > payload > license_system_id`](#payload_license_system_id)
@@ -18,13 +20,12 @@
 | **Required**              | No                                                                        |
 | **Additional properties** | [[Any type: allowed]](# "Additional Properties of any type are allowed.") |
 
-**Description:** ТЗ бүртгэх хүсэлтийн схем
 
 | Property                         | Pattern | Type   | Deprecated | Definition | Title/Description |
 | -------------------------------- | ------- | ------ | ---------- | ---------- | ----------------- |
 | + [payload](#payload )           | No      | object | No         | -          | Бүртгэх дата      |
-| + [request_id](#request_id )     | No      | string | No         | -          | request_id        |
-| + [callback_url](#callback_url ) | No      | string | No         | -          | callback_url      |
+| + [request_id](#request_id )     | No      | string | No         | -          | Хүсэлтийн дугаар  |
+| + [callback_url](#callback_url ) | No      | string | No         | -          | Хариу буцаах URL  |
 
 ## <a name="payload"></a>1. Property `root > payload`
 
@@ -127,7 +128,7 @@
 | **Type**     | `string` |
 | **Required** | Yes      |
 
-**Description:** request_id
+**Description:** Хүсэлтийн дугаар
 
 ## <a name="callback_url"></a>3. Property `root > callback_url`
 
@@ -136,7 +137,7 @@
 | **Type**     | `string` |
 | **Required** | Yes      |
 
-**Description:** callback_url
+**Description:** Хариу буцаах URL
 
 ----------------------------------------------------------------------------------------------------------------------------
-Generated using [json-schema-for-humans](https://github.com/coveooss/json-schema-for-humans) on 2023-11-10 at 11:06:09 +0800
+Generated using [json-schema-for-humans](https://github.com/coveooss/json-schema-for-humans) on 2023-11-10 at 11:53:09 +0800

@@ -121,12 +121,12 @@
     },
     "request_id": {
       "type": "string",
-      "description": "request_id",
+      "description": "Хүсэлтийн дугаар",
       "error_msg": "[request_id] оруулна уу."
     },
     "callback_url": {
       "type": "string",
-      "description": "callback_url",
+      "description": "Хариу буцаах URL",
       "error_msg": "[callback_url] оруулна уу."
     }
   },
