@@ -1,6 +1,10 @@
 # Cirs-License-Registration-Issuer
 Барилгын тусгай зөвшөөрөл блокчэйнд бүртгэх
 
+Ухаалаг гэрээг доорх холбоосоор харах боломжтой.
+
+[https://github.com/teo-mn/Cirs-License-Registration-Sc](https://github.com/teo-mn/Cirs-License-Registration-Sc)
+
 ### Start django app
 
 ```
