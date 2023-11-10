@@ -1,0 +1,38 @@
+version: '3.6'
+
+services:
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: rabbitmq
+    restart: always
+    ports:
+    - 5672:5672
+    - 15672:15672
+  issuer_api:
+    container_name: issuer_api
+    image: corexchain/cirs-license-issuer
+    restart: always
+    ports:
+      - 8000:8000
+    volumes:
+      - "./staticfiles/static:/code/content/static"
+      - "./db/:/db"
+    depends_on:
+      - rabbitmq
+    env_file:
+      - ./issuer.env
+    command:
+      sh -c "/code/run.sh"
+  issuer_celery:
+    container_name: issuer_celery
+    image: corexchain/cirs-license-issuer
+    restart: always
+    depends_on:
+      - rabbitmq
+    volumes:
+      - "./staticfiles/static:/code/content/static"
+      - "./db/:/db"
+    env_file:
+      - ./issuer.env
+    command:
+      sh -c "/code/run_celery.sh"
