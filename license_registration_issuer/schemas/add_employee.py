@@ -2,6 +2,7 @@
 
 AddEmployeeSchema = {
     "type": "object",
+    "title": "ТЗ-тэй ААНБ-ын хасагдсан заалтан дээр орлуулах ИТА",
     "description": "ТЗ-тэй ААНБ-ын хасагдсан заалтан дээр орлуулах ИТА",
     "properties": {
         "payload": {
