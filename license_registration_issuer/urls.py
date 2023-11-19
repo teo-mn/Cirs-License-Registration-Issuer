@@ -19,6 +19,8 @@ import json
 from django.contrib import admin
 from django.http import HttpResponse
 from django.urls import path
+from django.views.decorators.csrf import csrf_exempt
+from graphene_django.views import GraphQLView
 from rest_framework import generics
 
 from blockchain.balance import get_balance
@@ -49,5 +51,6 @@ urlpatterns = [
     path('api/remove_employee', RemoveEmployeeView.as_view()),
     path('api/update', UpdateView.as_view()),
     path('api/address', AddressView.as_view()),
-    path('test', TestView.as_view())
+    path('test', TestView.as_view()),
+    path("graphql", csrf_exempt(GraphQLView.as_view(graphiql=True))),
 ]

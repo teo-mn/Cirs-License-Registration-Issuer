@@ -68,6 +68,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'license_registration_issuer',
     'django_celery_beat',
+    'graphene_django'
 ]
 
 MIDDLEWARE = [
@@ -197,3 +198,8 @@ GAS_FEE_GWEI = env.get_value('GAS_FEE_GWEI', int, 700)
 DEFAULT_GAS_LIMIT = env.get_value('DEFAULT_GAS_LIMIT', int, 2000000)
 ISSUER_ADDRESS = env.get_value('ISSUER_ADDRESS', str, '0x85F5c799e1edEe7Fc042638D5c00da3a5cC8c7a4')
 ISSUER_PK = env.get_value('ISSUER_PK', str, '')
+
+# graphql
+GRAPHENE = {
+    "SCHEMA": "license_registration_issuer.schema.schema"
+}
