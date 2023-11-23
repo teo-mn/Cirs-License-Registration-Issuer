@@ -29,14 +29,14 @@ DEBUG = env.get_value('DEBUG', bool, True)
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = env.get_value('SECRET_KEY', str, 'django-insecure-b6%@==j2_fn&mga5b!=u*u$6y@7*as&d5tw1!8ue*lp_x=*c0p')
 # SECURITY WARNING: don't run with debug turned on in production!
-ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', list, [])
+ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', list, ['*'])
 CSRF_TRUSTED_ORIGINS = env.list('CSRF_TRUSTED_ORIGINS', list, [])
 
 # CORS
-CORS_ALLOWED_ORIGINS = env.list('CORS_ALLOWED_ORIGINS', list, [])
+# CORS_ALLOWED_ORIGINS = env.list('CORS_ALLOWED_ORIGINS', list, ['*'])
 CORS_ALLOW_CREDENTIALS = True
 CORS_ORIGIN_ALLOW_ALL = True
-CORS_ORIGIN_WHITELIST = env.list('CORS_ORIGIN_WHITELIST', list, [])
+# CORS_ORIGIN_WHITELIST = env.list('CORS_ORIGIN_WHITELIST', list, ['*'])
 CORS_ALLOW_METHODS = [
     'DELETE',
     'GET',
@@ -68,7 +68,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'license_registration_issuer',
     'django_celery_beat',
-    'graphene_django'
+    'graphene_django',
+    'corsheaders'
 ]
 
 MIDDLEWARE = [
@@ -79,6 +80,8 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
+    'django.middleware.common.CommonMiddleware',
 ]
 
 ROOT_URLCONF = 'license_registration_issuer.urls'

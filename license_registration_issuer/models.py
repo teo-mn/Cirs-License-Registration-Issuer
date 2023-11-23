@@ -85,3 +85,29 @@ class EventLog(models.Model):
     requirement_name = models.CharField(max_length=1024, default='', blank=True)
     key = models.CharField(max_length=1024, default='', blank=True)
     value = models.CharField(max_length=1024, default='', blank=True)
+
+
+class LicenseProduct(models.Model):
+    id = models.CharField(max_length=128, primary_key=True, default=uuid.uuid4)
+    created_at = models.DateTimeField(auto_now_add=True, null=True)
+    updated_at = models.DateTimeField(auto_now=True, null=True)
+    name = models.CharField(max_length=255)
+    license_address = models.CharField(max_length=128, unique=True)
+    requirement_address = models.CharField(max_length=128)
+    kv_address = models.CharField(max_length=128)
+    is_active = models.BooleanField(default=True)
+
+
+class License(models.Model):
+    id = models.CharField(max_length=128, primary_key=True, default=uuid.uuid4)
+    created_at = models.DateTimeField(auto_now_add=True, null=True)
+    updated_at = models.DateTimeField(auto_now=True, null=True)
+    license_id = models.CharField(max_length=1024, default='', blank=True)
+    license_name = models.CharField(max_length=1024, default='', blank=True)
+    owner_id = models.CharField(max_length=1024, default='', blank=True)
+    owner_name = models.CharField(max_length=1024, default='', blank=True)
+    start_date = models.IntegerField(default=0)
+    end_date = models.IntegerField(default=0)
+    state = models.CharField(max_length=128)
+    tx = models.CharField(max_length=128)
+    license_address = models.CharField(max_length=128, default='')
