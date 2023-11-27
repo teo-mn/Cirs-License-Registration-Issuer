@@ -111,3 +111,26 @@ class License(models.Model):
     state = models.CharField(max_length=128)
     tx = models.CharField(max_length=128)
     license_address = models.CharField(max_length=128, default='')
+
+
+class LicenseRequirements(models.Model):
+    id = models.CharField(max_length=128, primary_key=True, default=uuid.uuid4)
+    created_at = models.DateTimeField(auto_now_add=True, null=True)
+    updated_at = models.DateTimeField(auto_now=True, null=True)
+    license_id = models.CharField(max_length=1024, default='', blank=True)
+    requirement_id = models.CharField(max_length=1024, default='', blank=True)
+    requirement_name = models.CharField(max_length=1024, default='', blank=True)
+    state = models.CharField(max_length=128)
+    tx = models.CharField(max_length=128)
+    license_address = models.CharField(max_length=128, default='')
+
+
+class Evidence(models.Model):
+    id = models.CharField(max_length=128, primary_key=True, default=uuid.uuid4)
+    created_at = models.DateTimeField(auto_now_add=True, null=True)
+    updated_at = models.DateTimeField(auto_now=True, null=True)
+    license_id = models.CharField(max_length=1024, default='', blank=True)
+    requirement_id = models.CharField(max_length=1024, default='', blank=True)
+    evidence_id = models.CharField(max_length=1024, default='', blank=True)
+    key = models.CharField(max_length=1024, default='', blank=True)
+    value = models.CharField(max_length=1024, default='', blank=True)
