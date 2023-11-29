@@ -3,12 +3,12 @@ import logging
 from web3 import Web3
 from web3.types import BlockData, EventData
 
-from license_registration_issuer.models import LatestSyncedBlock, EventLog, EventType
 from license_registration_issuer.settings import NODE_URL_WS, KV_ADDRESS, \
     REQUIREMENT_REGISTRATION_ADDRESS, LICENSE_REGISTRATION_ADDRESS
 from blockchain.abi.key_value_abi import kv_abi
 from blockchain.abi.license_abi import license_abi
 from blockchain.abi.requirement_abi import requirement_abi
+from syncer.models import EventLog, EventType, LatestSyncedBlock
 
 logger = logging.getLogger(__name__)
 

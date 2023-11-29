@@ -204,5 +204,5 @@ ISSUER_PK = env.get_value('ISSUER_PK', str, '')
 
 # graphql
 GRAPHENE = {
-    "SCHEMA": "license_registration_issuer.schema.schema"
+    "SCHEMA": "syncer.schema.schema"
 }

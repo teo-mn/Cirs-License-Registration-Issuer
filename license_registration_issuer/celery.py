@@ -26,20 +26,20 @@ def debug_task(self):
     print(f'Request: {self.request!r}')
 
 
-@app.on_after_configure.connect
-def schedule_periodic_tasks(sender, **kwargs):
-    # blockchain event syncer
-    sender.add_periodic_task(crontab(minute=SYNCER_CRON_JOB_MINUTE), task_sync.s(text='Task'))
-
-
-@app.task(bind=True)
-def task_sync(self, text):
-    from license_registration_issuer.syncer import KvSyncer, LicenseSyncer, RequirementSyncer
-    kv_syncer = KvSyncer()
-    kv_syncer.sync_new_events()
-
-    license_syncer = LicenseSyncer()
-    license_syncer.sync_new_events()
-
-    requirement_syncer = RequirementSyncer()
-    requirement_syncer.sync_new_events()
+# @app.on_after_configure.connect
+# def schedule_periodic_tasks(sender, **kwargs):
+#     # blockchain event syncer
+#     sender.add_periodic_task(crontab(minute=SYNCER_CRON_JOB_MINUTE), task_sync.s(text='Task'))
+#
+#
+# @app.task(bind=True)
+# def task_sync(self, text):
+#     from syncer.syncer import KvSyncer, LicenseSyncer, RequirementSyncer
+#     kv_syncer = KvSyncer()
+#     kv_syncer.sync_new_events()
+#
+#     license_syncer = LicenseSyncer()
+#     license_syncer.sync_new_events()
+#
+#     requirement_syncer = RequirementSyncer()
+#     requirement_syncer.sync_new_events()

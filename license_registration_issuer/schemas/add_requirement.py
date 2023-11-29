@@ -1,47 +1,16 @@
-RegisterSchema = {
+# noinspection DuplicatedCode
+
+AddRequirementSchema = {
   "type": "object",
-  "description": "ТЗ бүртгэх хүсэлтийн схем",
+  "description": "Заалт нэмэх хүсэлтийн схем",
   "properties": {
     "payload": {
       "type": "object",
       "description": "Бүртгэх дата",
       "properties": {
-        "license_system_id": {
-          "type": "string",
-          "description": "Тусгай зөвшөөрлийн системийн дугаар"
-        },
         "license_id": {
           "type": "string",
           "description": "ТЗ-ийн гэрчилгээний дугаар"
-        },
-        "license_type": {
-          "type": "string",
-          "description": "ТЗ-ийн төрөл. Жишээ: Барилга угсралт"
-        },
-        "start_date": {
-          "type": "number",
-          "description": "ТЗ хүчинтэй хугацаа эхлэх огноо"
-        },
-        "end_date": {
-          "type": "number",
-          "description": "ТЗ хүчинтэй хугацаа дуусах огноо"
-        },
-        "owner_id": {
-          "type": "string",
-          "description": "Тусгай зөвшөөрөл эзэмшигч ААН -н регистр"
-        },
-        "owner_name": {
-          "type": "string",
-          "description": "Тусгай зөвшөөрөл эзэмшигч ААН -н нэр"
-        },
-        "description": {
-          "type": "string",
-          "description": "Тайлбар /нэмэлт мэдээлэл/"
-        },
-        "state": {
-          "type": "number",
-          "description": "Блокчэйнд бичсэн эсэх төлөв. 0 бол бичээгүй, 1 бол бичсэн. 1 үед дахин бичихгүй",
-          "default": 0
         },
         "requirements": {
           "type": "array",
@@ -114,13 +83,7 @@ RegisterSchema = {
         }
       },
       "required": [
-        "license_system_id",
         "license_id",
-        "license_type",
-        "start_date",
-        "end_date",
-        "owner_id",
-        "owner_name",
         "requirements"
       ]
     },

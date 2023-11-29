@@ -1,7 +1,7 @@
 import graphene
 from graphene_django import DjangoObjectType
 
-from license_registration_issuer.models import LicenseProduct, EventLog, License, LicenseRequirements, Evidence
+from syncer.models import LicenseProduct, License, Evidence, LicenseRequirements
 
 
 class LicenseProductType(DjangoObjectType):
