@@ -3,13 +3,12 @@ import logging
 
 import requests
 from celery import shared_task
-from verify4py.json_utils import json_wrap
-from verify4py.utils import calc_hash_str
 
 from blockchain.issuer import Issuer
 from license_registration_issuer.models import Request
 from license_registration_issuer.settings import CELERY_TASK_DEFAULT_QUEUE, CELERY_TASK_DEFAULT_EXCHANGE, NODE_URL, \
     LICENSE_REGISTRATION_ADDRESS, REQUIREMENT_REGISTRATION_ADDRESS, KV_ADDRESS, ISSUER_ADDRESS, ISSUER_PK
+from license_registration_issuer.tasks.utils import employee_data_convert
 
 
 class RegisterHandler:
@@ -97,16 +96,10 @@ class RegisterHandler:
         return
 
     def issue_employee(self, employee: dict, license_id: str, requirement_id: str):
-        regnum_hash = calc_hash_str(json_wrap({"regnum": employee["regnum"]}))
+        secret_hash, info = employee_data_convert(employee)
         if employee['state'] == 0:
-            logging.info('[evidence] Issuing id: ' + regnum_hash)
-            employee_hash = calc_hash_str(json_wrap({"regnum": employee["regnum"],
-                                                     "last_name": employee["last_name"],
-                                                     "first_name": employee["first_name"],
-                                                     "profession": employee["profession"],
-                                                     "degree": employee["degree"]
-                                                     }))
-            tx, error = self.issuer.set_data(regnum_hash, employee_hash, ISSUER_ADDRESS, ISSUER_PK)
+            logging.info('[evidence] Issuing id: ' + secret_hash)
+            tx, error = self.issuer.set_data(secret_hash, info, ISSUER_ADDRESS, ISSUER_PK)
             if error != '' and error is not None:
                 self.has_error = True
                 logging.error('Error occurred: ' + str(id))
@@ -117,7 +110,7 @@ class RegisterHandler:
             tx, error = self.issuer.set_evidence(
                 license_id,
                 requirement_id,
-                regnum_hash,
+                secret_hash,
                 '' if 'description' not in employee else employee['description'],
                 ISSUER_ADDRESS,
                 ISSUER_PK
@@ -133,7 +126,7 @@ class RegisterHandler:
             self.instance.data = json.dumps(self.data)
             self.instance.save()
         else:
-            logging.info('[evidence] Skipping id: ' + regnum_hash)
+            logging.info('[evidence] Skipping id: ' + secret_hash)
         return True
 
     def handle(self):

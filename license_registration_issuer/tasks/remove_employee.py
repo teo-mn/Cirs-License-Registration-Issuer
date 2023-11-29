@@ -2,23 +2,22 @@ import json
 import logging
 
 from celery import shared_task
-from verify4py.json_utils import json_wrap
-from verify4py.utils import calc_hash_str
 
 from license_registration_issuer.settings import CELERY_TASK_DEFAULT_QUEUE, CELERY_TASK_DEFAULT_EXCHANGE, \
     ISSUER_ADDRESS, ISSUER_PK
 from license_registration_issuer.tasks.register import RegisterHandler
+from license_registration_issuer.tasks.utils import employee_data_convert
 
 
 class RemoveEmployeeHandler(RegisterHandler):
     def remove_employee(self, employee: dict, license_id: str, requirement_id: str):
+        secret_hash, info = employee_data_convert(employee)
         if employee['state'] == 0:
-            logging.info('[evidence] Revoking id: ' + employee['license_id'])
-            regnum_hash = calc_hash_str(json_wrap({"regnum": employee["regnum"]}))
+            logging.info('[evidence] Revoking id: ' + secret_hash)
             tx, error = self.issuer.revoke_evidence(
                 license_id,
                 requirement_id,
-                regnum_hash,
+                secret_hash,
                 '' if 'description' not in employee else employee['description'],
                 ISSUER_ADDRESS,
                 ISSUER_PK
@@ -35,7 +34,7 @@ class RemoveEmployeeHandler(RegisterHandler):
             self.instance.save()
             return True
         else:
-            logging.info('[evidence] Skipping id: ' + employee['license_id'])
+            logging.info('[evidence] Skipping id: ' + secret_hash)
 
     def handle(self):
         self.remove_employee(self.data, self.data['license_id'], self.data['requirement_id'])
