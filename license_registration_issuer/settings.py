@@ -69,7 +69,8 @@ INSTALLED_APPS = [
     'license_registration_issuer',
     'django_celery_beat',
     'graphene_django',
-    'corsheaders'
+    'corsheaders',
+    'syncer'
 ]
 
 MIDDLEWARE = [
@@ -192,11 +193,12 @@ SYNCER_CRON_JOB_MINUTE = env.get_value('SYNCER_CRON_JOB_MINUTE', str, '*/3')
 NODE_URL = env.get_value('NODE_URL', str, 'https://node-testnet.corexchain.io')
 NODE_URL_WS = env.get_value('NODE_URL_WS', str, 'ws://157.245.49.81:18546')  # ws://34.124.146.188:18546
 CHAIN_ID = env.get_value('CHAIN_ID', int, 3305)
+PRODUCT_ADDRESS = env.get_value('PRODUCT_ADDRESS', str, '0xf8018dF37812a01d227739eaC47c1d23FB4855fe')
+KV_ADDRESS = env.get_value('KV_ADDRESS', str, '0x863fEDb4DDb91222dEf672cd7983662c7d259761')
 LICENSE_REGISTRATION_ADDRESS = env.get_value('LICENSE_REGISTRATION_ADDRESS', str,
-                                             '0x6c4d4A9CCf42Adb52336872c8AD719dCA557763D')
+                                             '0x1B44230166FBD93A27b68f638bc2E5bdc06a434d')
 REQUIREMENT_REGISTRATION_ADDRESS = env.get_value('REQUIREMENT_REGISTRATION_ADDRESS', str,
-                                                 '0xff68A90c6A3D7F9FCdBEAe043167fBB4171d5e64')
-KV_ADDRESS = env.get_value('KV_ADDRESS', str, '0xA76D11E077FE691Cf9e27639c1AFf96a15B3D9EE')
+                                                 '0xbC50Cb6A89D5D80CA977a7bb3e55BD8c5dDd6D4d')
 GAS_FEE_GWEI = env.get_value('GAS_FEE_GWEI', int, 700)
 DEFAULT_GAS_LIMIT = env.get_value('DEFAULT_GAS_LIMIT', int, 2000000)
 ISSUER_ADDRESS = env.get_value('ISSUER_ADDRESS', str, '0x85F5c799e1edEe7Fc042638D5c00da3a5cC8c7a4')

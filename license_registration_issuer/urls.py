@@ -27,6 +27,7 @@ from blockchain.balance import get_balance
 from license_registration_issuer.settings import ISSUER_ADDRESS
 from license_registration_issuer.views import RegisterView, AddEmployeeView, RemoveEmployeeView, UpdateView, RevokeView, \
     AddRequirementView, RemoveRequirementView
+from syncer.syncer import BlockSyncer
 
 
 class TestView(generics.GenericAPIView):
@@ -35,6 +36,8 @@ class TestView(generics.GenericAPIView):
         return HttpResponse(json.dumps(request.data), headers={"Content-Type": "application/json"})
 
     def get(self, request):
+        b = BlockSyncer()
+        b.syn_new_blocks()
         return HttpResponse('')
 
 

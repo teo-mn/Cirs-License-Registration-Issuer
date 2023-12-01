@@ -1,10 +1,10 @@
+import uuid
+
 from django.db import models
 
 
 class LatestSyncedBlock(models.Model):
-    last_synced_block_kv = models.IntegerField(default=-1)
-    last_synced_block_license = models.IntegerField(default=-1)
-    last_synced_block_requirement = models.IntegerField(default=-1)
+    last_synced_block_number = models.IntegerField(default=0)
 
 
 class EventType(models.TextChoices):
@@ -78,11 +78,14 @@ class License(models.Model):
     license_name = models.CharField(max_length=1024, default='', blank=True)
     owner_id = models.CharField(max_length=1024, default='', blank=True)
     owner_name = models.CharField(max_length=1024, default='', blank=True)
+    additional_data = models.CharField(max_length=1024, default='', blank=True)
     start_date = models.IntegerField(default=0)
     end_date = models.IntegerField(default=0)
     state = models.CharField(max_length=128)
     tx = models.CharField(max_length=128)
     license_address = models.CharField(max_length=128, default='')
+    timestamp = models.IntegerField(default=0)
+    contract_address = models.CharField(max_length=1288, default='')
 
 
 class LicenseRequirements(models.Model):
@@ -92,9 +95,12 @@ class LicenseRequirements(models.Model):
     license_id = models.CharField(max_length=1024, default='', blank=True)
     requirement_id = models.CharField(max_length=1024, default='', blank=True)
     requirement_name = models.CharField(max_length=1024, default='', blank=True)
+    additional_data = models.CharField(max_length=1024, default='', blank=True)
     state = models.CharField(max_length=128)
     tx = models.CharField(max_length=128)
     license_address = models.CharField(max_length=128, default='')
+    timestamp = models.IntegerField(default=0)
+    contract_address = models.CharField(max_length=1288, default='')
 
 
 class Evidence(models.Model):
@@ -106,3 +112,6 @@ class Evidence(models.Model):
     evidence_id = models.CharField(max_length=1024, default='', blank=True)
     key = models.CharField(max_length=1024, default='', blank=True)
     value = models.CharField(max_length=1024, default='', blank=True)
+    additional_data = models.CharField(max_length=1024, default='', blank=True)
+    timestamp = models.IntegerField(default=0)
+    contract_address = models.CharField(max_length=128, default='')
