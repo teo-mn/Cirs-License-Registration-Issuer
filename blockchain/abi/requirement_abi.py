@@ -133,6 +133,12 @@ requirement_abi = [
                 "internalType": "bytes",
                 "name": "requirementName",
                 "type": "bytes"
+            },
+            {
+                "indexed": False,
+                "internalType": "bytes",
+                "name": "additionalData",
+                "type": "bytes"
             }
         ],
         "name": "LicenseRequirementRegistered",

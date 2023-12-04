@@ -84,6 +84,12 @@ license_abi = [
                 "internalType": "uint256",
                 "name": "endDate",
                 "type": "uint256"
+            },
+            {
+                "indexed": False,
+                "internalType": "bytes",
+                "name": "additionalData",
+                "type": "bytes"
             }
         ],
         "name": "LicenseRegistered",
@@ -102,6 +108,12 @@ license_abi = [
                 "indexed": False,
                 "internalType": "bytes",
                 "name": "requirementID",
+                "type": "bytes"
+            },
+            {
+                "indexed": False,
+                "internalType": "bytes",
+                "name": "additionalData",
                 "type": "bytes"
             }
         ],
@@ -525,6 +537,11 @@ license_abi = [
             {
                 "internalType": "bytes",
                 "name": "requirementID",
+                "type": "bytes"
+            },
+            {
+                "internalType": "bytes",
+                "name": "additionalData",
                 "type": "bytes"
             }
         ],

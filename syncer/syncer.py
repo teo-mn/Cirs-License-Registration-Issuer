@@ -8,14 +8,151 @@ from license_registration_issuer.settings import NODE_URL_WS, PRODUCT_ADDRESS
 from blockchain.abi.key_value_abi import kv_abi
 from blockchain.abi.license_abi import license_abi
 from blockchain.abi.requirement_abi import requirement_abi
-from syncer.models import EventLog, EventType, LicenseProduct, LatestSyncedBlock
+from syncer.models import EventLog, EventType, LicenseProduct, LatestSyncedBlock, License, BlockchainState, \
+    LicenseRequirements, Evidence
 
 logger = logging.getLogger(__name__)
 
 
 def handle_license(event: EventData, block: BlockData):
     if EventType.from_name(event['event']) == EventType.LICENSE_REGISTERED:
-        pass
+        instance = License.objects.filter(contract_address=event['address'],
+                                          license_id=event['args']['licenseID'].decode()) \
+            .first()
+        if instance is None:
+            instance = License.objects.create(
+                contract_address=event['address'],
+                license_id=event['args']['licenseID'].decode(),
+                license_name=event['args']['licenseName'].decode(),
+                owner_id=event['args']['ownerID'].decode(),
+                owner_name=event['args']['ownerName'].decode(),
+                start_date=event['args']['startDate'],
+                end_date=event['args']['endDate'],
+                timestamp=block['timestamp'],
+                additional_data=event['args']['additionalData'].decode(),
+                state=BlockchainState.REGISTERED
+            )
+        elif instance.timestamp < block['timestamp']:
+            instance.contract_address = event['address']
+            instance.license_id = event['args']['licenseID'].decode()
+            instance.license_name = event['args']['licenseName'].decode()
+            instance.owner_id = event['args']['ownerID'].decode()
+            instance.owner_name = event['args']['ownerName'].decode()
+            instance.start_date = event['args']['startDate']
+            instance.end_date = event['args']['endDate']
+            instance.timestamp = block['timestamp']
+            instance.additional_data = event['args']['additionalData'].decode()
+            instance.state = BlockchainState.REGISTERED
+        instance.save()
+    elif EventType.from_name(event['event']) == EventType.LICENSE_REVOKED:
+        instance = License.objects.filter(contract_address=event['address'],
+                                          license_id=event['args']['licenseID'].decode()).first()
+        if instance is None:
+            logger.warning('Unexpected case')
+            instance = License.objects.create(
+                contract_address=event['address'],
+                license_id=event['args']['licenseID'].decode(),
+                license_name=event['args']['licenseName'].decode(),
+                state=BlockchainState.REVOKED,
+                timestamp=block['timestamp']
+            )
+        elif instance.timestamp < block['timestamp']:
+            instance.state = BlockchainState.REVOKED
+            instance.timestamp = block['timestamp']
+        instance.save()
+
+
+def handle_requirement(event: EventData, block: BlockData):
+    if EventType.from_name(event['event']) == EventType.REQUIREMENT_REGISTERED:
+        instance = LicenseRequirements.objects.filter(contract_address=event['address'],
+                                                      license_id=event['args']['licenseID'].decode(),
+                                                      requirement_id=event['args']['requirementID'].decode()) \
+            .first()
+        if instance is None:
+            instance = LicenseRequirements.objects.create(
+                contract_address=event['address'],
+                license_id=event['args']['licenseID'].decode(),
+                requirement_id=event['args']['licenseID'].decode(),
+                requirement_name=event['args']['requirementName'].decode(),
+                additional_data=event['args']['additionalData'].decode(),
+                state=BlockchainState.REGISTERED,
+                timestamp=block['timestamp'],
+                license_address=''
+            )
+        elif instance.timestamp < block['timestamp']:
+            instance.contract_address = event['address']
+            instance.license_id = event['args']['licenseID'].decode()
+            instance.requirement_id = event['args']['requirementID'].decode()
+            instance.requirement_name = event['args']['requirementName'].decode()
+            instance.additional_data = event['args']['additionalData'].decode()
+            instance.state = BlockchainState.REGISTERED
+            instance.timestamp = block['timestamp']
+        instance.save()
+    elif EventType.from_name(event['event']) == EventType.REQUIREMENT_REVOKED:
+        instance = License.objects.filter(contract_address=event['address'],
+                                          license_id=event['args']['licenseID'].decode(),
+                                          requirement_id=event['args']['requirementID'].decode()).first()
+        if instance is None:
+            logger.warning('Unexpected case')
+            instance = LicenseRequirements.objects.create(
+                contract_address=event['address'],
+                license_id=event['args']['licenseID'].decode(),
+                requirement_id=event['args']['requirementID'].decode(),
+                state=BlockchainState.REVOKED,
+                license_address='',
+                timestamp=block['timestamp']
+            )
+        elif instance.timestamp < block['timestamp']:
+            instance.state = BlockchainState.REVOKED
+            instance.timestamp = block['timestamp']
+        instance.save()
+
+
+def handle_evidence(event: EventData, block: BlockData):
+    if EventType.from_name(event['event']) == EventType.EVIDENCE_REGISTERED:
+        instance = Evidence.objects.filter(contract_address=event['address'],
+                                           license_id=event['args']['licenseID'].decode(),
+                                           requirement_id=event['args']['requirementID'].decode(),
+                                           evidence_id=event['args']['evidenceID']
+                                           ).first()
+        if instance is None:
+            instance = Evidence.objects.create(
+                contract_address=event['address'],
+                license_id=event['args']['licenseID'].decode(),
+                requirement_id=event['args']['licenseID'].decode(),
+                evidence_id=event['args']['evidenceID'].decode(),
+                timestamp=block['timestamp'],
+                additional_data=event['args']['additionalData'].decode(),
+                state=BlockchainState.REGISTERED
+            )
+        elif instance.timestamp < block['timestamp']:
+            instance.contract_address = event['address']
+            instance.license_id = event['args']['licenseID'].decode()
+            instance.requirement_id = event['args']['requirementID'].decode()
+            instance.evidence_id = event['args']['evidenceID'].decode()
+            instance.timestamp = block['timestamp']
+            instance.additional_data = event['args']['additionalData'].decode()
+            instance.state = BlockchainState.REGISTERED
+        instance.save()
+    elif EventType.from_name(event['event']) == EventType.EVIDENCE_REVOKED:
+        instance = License.objects.filter(contract_address=event['address'],
+                                          license_id=event['args']['licenseID'].decode(),
+                                          requirement_id=event['args']['requirementID'].decode(),
+                                          evidence_id=event['args']['evidenceID']).first()
+        if instance is None:
+            logger.warning('Unexpected case')
+            instance = Evidence.objects.create(
+                contract_address=event['address'],
+                license_id=event['args']['licenseID'].decode(),
+                requirement_id=event['args']['requirementID'].decode(),
+                evidence_id=event['args']['evidenceID'].decode(),
+                state=BlockchainState.REVOKED,
+                timestamp=block['timestamp']
+            )
+        elif instance.timestamp < block['timestamp']:
+            instance.state = BlockchainState.REVOKED
+            instance.timestamp = block['timestamp']
+        instance.save()
 
 
 def handle_event(event: EventData, block: BlockData):
@@ -28,6 +165,7 @@ def handle_event(event: EventData, block: BlockData):
             block_number=block['number'],
             log_type=EventType.from_name(event['event']),
             timestamp=block['timestamp'],
+            contract_address=event['address']
         )
     if instance.log_type == EventType.SET_DATA:
         instance.key = event['args']['key'].decode()
@@ -63,6 +201,9 @@ def handle_event(event: EventData, block: BlockData):
         instance.evidence_id = event['args']['evidenceID'].decode()
         instance.additional_data = event['args']['additionalData'].decode()
     instance.save()
+    handle_license(event, block)
+    handle_requirement(event, block)
+    handle_evidence(event, block)
 
 
 def handle_register_product_event(event):
@@ -110,9 +251,8 @@ class BlockSyncer:
     def handle_event(self, event: EventData):
         logger.debug('Syncer found new event: ')
         logger.debug(event)
-        print(event)
-        print(self.current_block)
-        # handle_event(event, self.current_block)
+        block = self.web3.eth.get_block(event['blockNumber'])
+        handle_event(event, block)
 
     def sync_products(self, from_block, to_block):
         logger.debug('Syncing product contract from: ' + str(from_block) + ' to: ' + str(to_block))

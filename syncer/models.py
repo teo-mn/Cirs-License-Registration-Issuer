@@ -7,6 +7,11 @@ class LatestSyncedBlock(models.Model):
     last_synced_block_number = models.IntegerField(default=0)
 
 
+class BlockchainState(models.TextChoices):
+    REGISTERED = 'REGISTERED'
+    REVOKED = 'REVOKED'
+
+
 class EventType(models.TextChoices):
     SET_DATA = 'SET_DATA'
     LICENSE_REGISTERED = 'LICENSE_REGISTERED'
@@ -81,9 +86,10 @@ class License(models.Model):
     additional_data = models.CharField(max_length=1024, default='', blank=True)
     start_date = models.IntegerField(default=0)
     end_date = models.IntegerField(default=0)
-    state = models.CharField(max_length=128)
+    state = models.CharField(
+        choices=BlockchainState.choices,
+        max_length=32)
     tx = models.CharField(max_length=128)
-    license_address = models.CharField(max_length=128, default='')
     timestamp = models.IntegerField(default=0)
     contract_address = models.CharField(max_length=1288, default='')
 
@@ -96,7 +102,9 @@ class LicenseRequirements(models.Model):
     requirement_id = models.CharField(max_length=1024, default='', blank=True)
     requirement_name = models.CharField(max_length=1024, default='', blank=True)
     additional_data = models.CharField(max_length=1024, default='', blank=True)
-    state = models.CharField(max_length=128)
+    state = models.CharField(
+        choices=BlockchainState.choices,
+        max_length=32)
     tx = models.CharField(max_length=128)
     license_address = models.CharField(max_length=128, default='')
     timestamp = models.IntegerField(default=0)
@@ -115,3 +123,6 @@ class Evidence(models.Model):
     additional_data = models.CharField(max_length=1024, default='', blank=True)
     timestamp = models.IntegerField(default=0)
     contract_address = models.CharField(max_length=128, default='')
+    state = models.CharField(
+        choices=BlockchainState.choices,
+        max_length=32)
