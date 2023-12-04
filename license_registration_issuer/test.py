@@ -28,10 +28,10 @@ employees = [
 
 
 def fill_data():
-    # requests.post('http://localhost:8000/api/register', data)
-    cnt_license = 30
-    cnt_req = 10
-    cnt_employee = 3
+    cnt_license = 3
+    cnt_req = 3
+    cnt_employee = 2
+    prefix = 'test-1205-'
 
     for i in range(cnt_license):
         start_date = random.randint(1698656171, 1702198571)
@@ -41,9 +41,9 @@ def fill_data():
             "request_id": "9",
             "callback_url": "http://localhost:8000/test",
             "payload": {
-                "license_system_id": str(i),
+                "license_system_id": prefix + str(i),
                 "license_type": licenses[random.randint(0, len(licenses) - 1)],
-                "license_id": str(i),
+                "license_id": prefix + str(i),
                 "start_date": start_date,
                 "end_date": random.randint(start_date, 1733820971),
                 "owner_id": str(owner[0]),
@@ -52,9 +52,10 @@ def fill_data():
             }
         }
         for j in range(cnt_req):
+            rr = requirements[random.randint(0, len(requirements) - 1)]
             req = {
-                "requirement_system_id": str(i * 100 + j),
-                "requirement_id": str(i * 100 + j),
+                "requirement_system_id": rr,
+                "requirement_id": rr,
                 "state": 0,
                 "employees": []
             }

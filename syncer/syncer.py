@@ -72,7 +72,7 @@ def handle_requirement(event: EventData, block: BlockData):
             instance = LicenseRequirements.objects.create(
                 contract_address=event['address'],
                 license_id=event['args']['licenseID'].decode(),
-                requirement_id=event['args']['licenseID'].decode(),
+                requirement_id=event['args']['requirementID'].decode(),
                 requirement_name=event['args']['requirementName'].decode(),
                 additional_data=event['args']['additionalData'].decode(),
                 state=BlockchainState.REGISTERED,
@@ -119,7 +119,7 @@ def handle_evidence(event: EventData, block: BlockData):
             instance = Evidence.objects.create(
                 contract_address=event['address'],
                 license_id=event['args']['licenseID'].decode(),
-                requirement_id=event['args']['licenseID'].decode(),
+                requirement_id=event['args']['requirementID'].decode(),
                 evidence_id=event['args']['evidenceID'].decode(),
                 timestamp=block['timestamp'],
                 additional_data=event['args']['additionalData'].decode(),

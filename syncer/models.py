@@ -106,7 +106,6 @@ class LicenseRequirements(models.Model):
         choices=BlockchainState.choices,
         max_length=32)
     tx = models.CharField(max_length=128)
-    license_address = models.CharField(max_length=128, default='')
     timestamp = models.IntegerField(default=0)
     contract_address = models.CharField(max_length=1288, default='')
 
