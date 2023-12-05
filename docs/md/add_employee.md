@@ -1,5 +1,4 @@
-# ТЗ ИТА-ийн шилжилт орлуулах хүсэлтийн схем
-**Description:** ТЗ-тэй ААНБ-ын хасагдсан заалтан дээр орлуулах ИТА
+# Schema Docs
 
 - [1. Property `root > payload`](#payload)
   - [1.1. Property `root > payload > state`](#payload_state)
@@ -20,6 +19,7 @@
 | **Required**              | No                                                                        |
 | **Additional properties** | [[Any type: allowed]](# "Additional Properties of any type are allowed.") |
 
+**Description:** ТЗ-тэй ААНБ-ын хасагдсан заалтан дээр орлуулах ИТА
 
 | Property                         | Pattern | Type   | Deprecated | Definition | Title/Description |
 | -------------------------------- | ------- | ------ | ---------- | ---------- | ----------------- |
@@ -150,4 +150,4 @@
 **Description:** Хариу буцаах URL
 
 ----------------------------------------------------------------------------------------------------------------------------
-Generated using [json-schema-for-humans](https://github.com/coveooss/json-schema-for-humans) on 2023-11-10 at 11:53:09 +0800
+Generated using [json-schema-for-humans](https://github.com/coveooss/json-schema-for-humans) on 2023-12-05 at 12:04:37 +0800

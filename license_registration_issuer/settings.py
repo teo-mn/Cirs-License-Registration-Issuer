@@ -29,14 +29,14 @@ DEBUG = env.get_value('DEBUG', bool, True)
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = env.get_value('SECRET_KEY', str, 'django-insecure-b6%@==j2_fn&mga5b!=u*u$6y@7*as&d5tw1!8ue*lp_x=*c0p')
 # SECURITY WARNING: don't run with debug turned on in production!
-ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', list, [])
+ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', list, ['*'])
 CSRF_TRUSTED_ORIGINS = env.list('CSRF_TRUSTED_ORIGINS', list, [])
 
 # CORS
-CORS_ALLOWED_ORIGINS = env.list('CORS_ALLOWED_ORIGINS', list, [])
+# CORS_ALLOWED_ORIGINS = env.list('CORS_ALLOWED_ORIGINS', list, ['*'])
 CORS_ALLOW_CREDENTIALS = True
 CORS_ORIGIN_ALLOW_ALL = True
-CORS_ORIGIN_WHITELIST = env.list('CORS_ORIGIN_WHITELIST', list, [])
+# CORS_ORIGIN_WHITELIST = env.list('CORS_ORIGIN_WHITELIST', list, ['*'])
 CORS_ALLOW_METHODS = [
     'DELETE',
     'GET',
@@ -68,6 +68,9 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'license_registration_issuer',
     'django_celery_beat',
+    'graphene_django',
+    'corsheaders',
+    'syncer'
 ]
 
 MIDDLEWARE = [
@@ -78,6 +81,8 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
+    'django.middleware.common.CommonMiddleware',
 ]
 
 ROOT_URLCONF = 'license_registration_issuer.urls'
@@ -183,17 +188,24 @@ CELERY_TASK_DEFAULT_EXCHANGE = env.get_value('CELERY_TASK_DEFAULT_EXCHANGE', str
 CELERY_TASK_DEFAULT_ROUTING_KEY = env.get_value('CELERY_TASK_DEFAULT_ROUTING_KEY', str, 'cirs_key')
 CELERY_TASK_DEFAULT_QUEUE = env.get_value('CELERY_TASK_DEFAULT_QUEUE', str, 'cirs_queue')
 SYNCER_CRON_JOB_MINUTE = env.get_value('SYNCER_CRON_JOB_MINUTE', str, '*/3')
+SYNCER_ON = env.get_value('SYNCER_ON', bool, False)
 
 # blockchain
 NODE_URL = env.get_value('NODE_URL', str, 'https://node-testnet.corexchain.io')
 NODE_URL_WS = env.get_value('NODE_URL_WS', str, 'ws://157.245.49.81:18546')  # ws://34.124.146.188:18546
 CHAIN_ID = env.get_value('CHAIN_ID', int, 3305)
+PRODUCT_ADDRESS = env.get_value('PRODUCT_ADDRESS', str, '0xD5a6036f145689A857270a5154Dfd731D6795375')
+KV_ADDRESS = env.get_value('KV_ADDRESS', str, '0xe5CA73D03774b1be632FF70832176B24c183EB0a')
 LICENSE_REGISTRATION_ADDRESS = env.get_value('LICENSE_REGISTRATION_ADDRESS', str,
-                                             '0x6c4d4A9CCf42Adb52336872c8AD719dCA557763D')
+                                             '0x51Dd1F5340BEE46C6d28262204FEA469C55205E5')
 REQUIREMENT_REGISTRATION_ADDRESS = env.get_value('REQUIREMENT_REGISTRATION_ADDRESS', str,
-                                                 '0xff68A90c6A3D7F9FCdBEAe043167fBB4171d5e64')
-KV_ADDRESS = env.get_value('KV_ADDRESS', str, '0xA76D11E077FE691Cf9e27639c1AFf96a15B3D9EE')
+                                                 '0x393eB5AA172a2aE6FD60225B139158b183fa23c8')
 GAS_FEE_GWEI = env.get_value('GAS_FEE_GWEI', int, 700)
 DEFAULT_GAS_LIMIT = env.get_value('DEFAULT_GAS_LIMIT', int, 2000000)
 ISSUER_ADDRESS = env.get_value('ISSUER_ADDRESS', str, '0x85F5c799e1edEe7Fc042638D5c00da3a5cC8c7a4')
 ISSUER_PK = env.get_value('ISSUER_PK', str, '')
+
+# graphql
+GRAPHENE = {
+    "SCHEMA": "syncer.schema.schema"
+}

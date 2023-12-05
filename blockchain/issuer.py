@@ -56,6 +56,21 @@ class Issuer:
         except Exception as e:
             return '', e
 
+    def revoke_license(self,
+                       license_id: str,
+                       additional_data: str,
+                       issuer_address: str,
+                       pk: str):
+        nonce = self.__client.eth.get_transaction_count(self.__client.to_checksum_address(issuer_address))
+        try:
+            func = self.__license_contract.functions.revoke(
+                license_id.encode('utf-8'),
+                additional_data.encode('utf-8')
+            )
+            return self.__tx_send(func, issuer_address, nonce, pk)
+        except Exception as e:
+            return '', e
+
     def register_requirement(self,
                              license_id: str,
                              requirement_id: str,
@@ -70,6 +85,24 @@ class Issuer:
                 license_id.encode('utf-8'),
                 requirement_id.encode('utf-8'),
                 requirement_name.encode('utf-8'),
+                additional_data.encode('utf-8')
+            )
+            return self.__tx_send(func, issuer_address, nonce, pk)
+        except Exception as e:
+            return '', e
+
+    def revoke_requirement(self,
+                           license_id: str,
+                           requirement_id: str,
+                           additional_data: str,
+                           issuer_address: str,
+                           pk: str):
+
+        nonce = self.__client.eth.get_transaction_count(self.__client.to_checksum_address(issuer_address))
+        try:
+            func = self.__requirement_contract.functions.revoke(
+                license_id.encode('utf-8'),
+                requirement_id.encode('utf-8'),
                 additional_data.encode('utf-8')
             )
             return self.__tx_send(func, issuer_address, nonce, pk)

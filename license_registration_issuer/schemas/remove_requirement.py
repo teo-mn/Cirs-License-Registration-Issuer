@@ -1,6 +1,8 @@
-{
+# noinspection DuplicatedCode
+
+RemoveRequirementSchema = {
   "type": "object",
-  "description": "ТЗ-тэй ААНБ-аас ИТА хасах",
+  "description": "Заалт хасах хүсэлтийн схем",
   "properties": {
     "payload": {
       "type": "object",
@@ -19,39 +21,14 @@
           "type": "string",
           "description": "Заалтын дугаар"
         },
-        "regnum": {
-          "type": "string",
-          "description": "ИТА-н Регистр"
-        },
-        "last_name": {
-          "type": "string",
-          "description": "ИТА-н Эцэг/эх/-н нэр"
-        },
-        "first_name": {
-          "type": "string",
-          "description": "ИТА-н Өөрийн нэр"
-        },
-        "profession": {
-          "type": "string",
-          "description": "ИТА-н Mэргэжил"
-        },
-        "degree": {
-          "type": "string",
-          "description": "ИТА-н Mэргэшлийн зэрэг"
-        },
         "description": {
           "type": "string",
           "description": "Тайлбар /нэмэлт мэдээлэл/"
-        }
+        },
       },
       "required": [
         "license_id",
         "requirement_id",
-        "regnum",
-        "last_name",
-        "first_name",
-        "profession",
-        "degree",
         "description"
       ]
     },

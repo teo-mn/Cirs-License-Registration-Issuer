@@ -53,7 +53,8 @@ RemoveEmployeeSchema = {
         "last_name",
         "first_name",
         "profession",
-        "degree"
+        "degree",
+        "description"
       ]
     },
     "request_id": {

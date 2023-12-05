@@ -19,11 +19,15 @@ import json
 from django.contrib import admin
 from django.http import HttpResponse
 from django.urls import path
+from django.views.decorators.csrf import csrf_exempt
+from graphene_django.views import GraphQLView
 from rest_framework import generics
 
 from blockchain.balance import get_balance
-from license_registration_issuer.settings import ISSUER_ADDRESS
-from license_registration_issuer.views import RegisterView, AddEmployeeView, RemoveEmployeeView, UpdateView
+from license_registration_issuer.settings import ISSUER_ADDRESS, LICENSE_REGISTRATION_ADDRESS
+from license_registration_issuer.views import RegisterView, AddEmployeeView, RemoveEmployeeView, UpdateView, \
+    RevokeView, AddRequirementView, RemoveRequirementView, RetryView
+from syncer.syncer import BlockSyncer
 
 
 class TestView(generics.GenericAPIView):
@@ -32,22 +36,30 @@ class TestView(generics.GenericAPIView):
         return HttpResponse(json.dumps(request.data), headers={"Content-Type": "application/json"})
 
     def get(self, request):
+        b = BlockSyncer()
+        b.syn_new_blocks()
         return HttpResponse('')
 
 
 class AddressView(generics.GenericAPIView):
 
     def get(self, request):
-        data = json.dumps({'address': ISSUER_ADDRESS, 'balance': get_balance(ISSUER_ADDRESS)})
+        data = json.dumps({'address': ISSUER_ADDRESS, 'balance': get_balance(ISSUER_ADDRESS),
+                           'license_address': LICENSE_REGISTRATION_ADDRESS})
         return HttpResponse(data, headers={"Content-Type": "application/json"})
 
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/register', RegisterView.as_view()),
+    path('api/revoke', RevokeView.as_view()),
     path('api/add_employee', AddEmployeeView.as_view()),
     path('api/remove_employee', RemoveEmployeeView.as_view()),
+    path('api/add_requirement', AddRequirementView.as_view()),
+    path('api/remove_requirement', RemoveRequirementView.as_view()),
     path('api/update', UpdateView.as_view()),
+    path('api/retry', RetryView.as_view()),
     path('api/address', AddressView.as_view()),
-    path('test', TestView.as_view())
+    path('test', TestView.as_view()),
+    path("graphql", csrf_exempt(GraphQLView.as_view(graphiql=True))),
 ]

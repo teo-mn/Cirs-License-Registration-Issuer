@@ -4,9 +4,12 @@ from django.db import models
 
 class RequestType(models.TextChoices):
     REGISTER = 'REGISTER'
+    REVOKE = 'REVOKE'
     UPDATE_DURATION = 'UPDATE_DURATION'
-    REMOVE_ENGINEER = 'REMOVE_ENGINEER'
-    ADD_ENGINEER = 'ADD_ENGINEER'
+    ADD_EMPLOYEE = 'ADD_EMPLOYEE'
+    REMOVE_EMPLOYEE = 'REMOVE_EMPLOYEE'
+    ADD_REQUIREMENT = 'ADD_REQUIREMENT'
+    REMOVE_REQUIREMENT = 'REMOVE_REQUIREMENT'
 
 
 class RequestState(models.IntegerChoices):
@@ -20,68 +23,10 @@ class Request(models.Model):
     request_type = models.CharField(
         choices=RequestType.choices,
         default=RequestType.REGISTER,
-        max_length=16)
+        max_length=20)
     state = models.IntegerField(
         choices=RequestState.choices,
         default=RequestState.DRAFT
     )
     callback_url = models.CharField(max_length=256, blank=True)
     data = models.CharField(max_length=2048, default='')
-
-
-class LatestSyncedBlock(models.Model):
-    last_synced_block_kv = models.IntegerField(default=-1)
-    last_synced_block_license = models.IntegerField(default=-1)
-    last_synced_block_requirement = models.IntegerField(default=-1)
-
-
-class EventType(models.TextChoices):
-    SET_DATA = 'SET_DATA'
-    LICENSE_REGISTERED = 'LICENSE_REGISTERED'
-    LICENSE_REVOKED = 'LICENSE_REVOKED'
-    REQUIREMENT_REGISTERED = 'REQUIREMENT_REGISTERED'
-    REQUIREMENT_REVOKED = 'REQUIREMENT_REVOKED'
-    EVIDENCE_REGISTERED = 'EVIDENCE_REGISTERED'
-    EVIDENCE_REVOKED = 'EVIDENCE_REVOKED'
-
-    @classmethod
-    def from_name(cls, event_name):
-        if event_name == 'SetData':
-            return EventType.SET_DATA
-        elif event_name == 'LicenseRegistered':
-            return EventType.LICENSE_REGISTERED
-        elif event_name == 'LicenseRevoked':
-            return EventType.LICENSE_REVOKED
-        elif event_name == 'LicenseRequirementRegistered':
-            return EventType.REQUIREMENT_REGISTERED
-        elif event_name == 'LicenseRequirementRevoked':
-            return EventType.REQUIREMENT_REVOKED
-        elif event_name == 'EvidenceRegistered':
-            return EventType.EVIDENCE_REGISTERED
-        elif event_name == 'EvidenceRevoked':
-            return EventType.EVIDENCE_REVOKED
-
-
-class EventLog(models.Model):
-    id = models.CharField(max_length=128, primary_key=True, default=uuid.uuid4)
-    created_at = models.DateTimeField(auto_now_add=True, null=True)
-    updated_at = models.DateTimeField(auto_now=True, null=True)
-    tx = models.CharField(max_length=128)
-    log_type = models.CharField(
-        choices=EventType.choices,
-        max_length=32)
-    block_number = models.IntegerField()
-    contract_address = models.CharField(max_length=128)
-    timestamp = models.IntegerField()
-    license_id = models.CharField(max_length=1024, default='', blank=True)
-    license_name = models.CharField(max_length=1024, default='', blank=True)
-    owner_id = models.CharField(max_length=1024, default='', blank=True)
-    owner_name = models.CharField(max_length=1024, default='', blank=True)
-    start_date = models.IntegerField(default=0)
-    end_date = models.IntegerField(default=0)
-    additional_data = models.CharField(max_length=1024, default='', blank=True)
-    requirement_id = models.CharField(max_length=1024, default='', blank=True)
-    evidence_id = models.CharField(max_length=1024, default='', blank=True)
-    requirement_name = models.CharField(max_length=1024, default='', blank=True)
-    key = models.CharField(max_length=1024, default='', blank=True)
-    value = models.CharField(max_length=1024, default='', blank=True)

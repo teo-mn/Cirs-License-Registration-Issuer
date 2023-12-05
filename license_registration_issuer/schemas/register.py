@@ -14,6 +14,10 @@ RegisterSchema = {
           "type": "string",
           "description": "ТЗ-ийн гэрчилгээний дугаар"
         },
+        "license_type": {
+          "type": "string",
+          "description": "ТЗ-ийн төрөл. Жишээ: Барилга угсралт"
+        },
         "start_date": {
           "type": "number",
           "description": "ТЗ хүчинтэй хугацаа эхлэх огноо"
@@ -112,6 +116,7 @@ RegisterSchema = {
       "required": [
         "license_system_id",
         "license_id",
+        "license_type",
         "start_date",
         "end_date",
         "owner_id",

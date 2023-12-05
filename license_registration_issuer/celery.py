@@ -5,7 +5,7 @@ from celery import Celery
 # Set the default Django settings module for the 'celery' program.
 from celery.schedules import crontab
 
-from license_registration_issuer.settings import SYNCER_CRON_JOB_MINUTE
+from license_registration_issuer.settings import SYNCER_CRON_JOB_MINUTE, SYNCER_ON
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'license_registration_issuer.settings')
 
@@ -29,17 +29,12 @@ def debug_task(self):
 @app.on_after_configure.connect
 def schedule_periodic_tasks(sender, **kwargs):
     # blockchain event syncer
-    sender.add_periodic_task(crontab(minute=SYNCER_CRON_JOB_MINUTE), task_sync.s(text='Task'))
+    if SYNCER_ON:
+        sender.add_periodic_task(crontab(minute=SYNCER_CRON_JOB_MINUTE), task_sync.s(text='Task'))
 
 
 @app.task(bind=True)
 def task_sync(self, text):
-    from license_registration_issuer.syncer import KvSyncer, LicenseSyncer, RequirementSyncer
-    kv_syncer = KvSyncer()
-    kv_syncer.sync_new_events()
-
-    license_syncer = LicenseSyncer()
-    license_syncer.sync_new_events()
-
-    requirement_syncer = RequirementSyncer()
-    requirement_syncer.sync_new_events()
+    from syncer.syncer import BlockSyncer
+    syncer = BlockSyncer()
+    syncer.syn_new_blocks()
