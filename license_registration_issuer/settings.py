@@ -188,6 +188,7 @@ CELERY_TASK_DEFAULT_EXCHANGE = env.get_value('CELERY_TASK_DEFAULT_EXCHANGE', str
 CELERY_TASK_DEFAULT_ROUTING_KEY = env.get_value('CELERY_TASK_DEFAULT_ROUTING_KEY', str, 'cirs_key')
 CELERY_TASK_DEFAULT_QUEUE = env.get_value('CELERY_TASK_DEFAULT_QUEUE', str, 'cirs_queue')
 SYNCER_CRON_JOB_MINUTE = env.get_value('SYNCER_CRON_JOB_MINUTE', str, '*/3')
+SYNCER_ON = env.get_value('SYNCER_ON', bool, False)
 
 # blockchain
 NODE_URL = env.get_value('NODE_URL', str, 'https://node-testnet.corexchain.io')

@@ -1,6 +1,4 @@
-# noinspection DuplicatedCode
-
-RevokeSchema = {
+{
   "type": "object",
   "description": "ТЗ цуцлах хүсэлтийн схем",
   "properties": {

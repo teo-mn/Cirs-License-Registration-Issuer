@@ -1,16 +1,15 @@
-# ТЗ сунгалт хийх хүсэлтийн схем
-
-**Description:** Тусгай зөвшөөрлийн сунгалт /Хүчинтэй хугацаа сунгах/
+# Schema Docs
 
 - [1. Property `root > payload`](#payload)
   - [1.1. Property `root > payload > license_system_id`](#payload_license_system_id)
   - [1.2. Property `root > payload > license_id`](#payload_license_id)
-  - [1.3. Property `root > payload > start_date`](#payload_start_date)
-  - [1.4. Property `root > payload > end_date`](#payload_end_date)
-  - [1.5. Property `root > payload > owner_id`](#payload_owner_id)
-  - [1.6. Property `root > payload > owner_name`](#payload_owner_name)
-  - [1.7. Property `root > payload > description`](#payload_description)
-  - [1.8. Property `root > payload > state`](#payload_state)
+  - [1.3. Property `root > payload > license_type`](#payload_license_type)
+  - [1.4. Property `root > payload > start_date`](#payload_start_date)
+  - [1.5. Property `root > payload > end_date`](#payload_end_date)
+  - [1.6. Property `root > payload > owner_id`](#payload_owner_id)
+  - [1.7. Property `root > payload > owner_name`](#payload_owner_name)
+  - [1.8. Property `root > payload > description`](#payload_description)
+  - [1.9. Property `root > payload > state`](#payload_state)
 - [2. Property `root > request_id`](#request_id)
 - [3. Property `root > callback_url`](#callback_url)
 
@@ -20,6 +19,7 @@
 | **Required**              | No                                                                        |
 | **Additional properties** | [[Any type: allowed]](# "Additional Properties of any type are allowed.") |
 
+**Description:** Тусгай зөвшөөрлийн сунгалт /Хүчинтэй хугацаа сунгах/
 
 | Property                         | Pattern | Type   | Deprecated | Definition | Title/Description |
 | -------------------------------- | ------- | ------ | ---------- | ---------- | ----------------- |
@@ -41,6 +41,7 @@
 | -------------------------------------------------- | ------- | ------ | ---------- | ---------- | ------------------------------------------------------------------------------- |
 | + [license_system_id](#payload_license_system_id ) | No      | string | No         | -          | Тусгай зөвшөөрлийн системийн дугаар                                             |
 | + [license_id](#payload_license_id )               | No      | string | No         | -          | ТЗ-ийн гэрчилгээний дугаар                                                      |
+| + [license_type](#payload_license_type )           | No      | string | No         | -          | ТЗ-ийн төрөл. Жишээ: Барилга угсралт                                            |
 | + [start_date](#payload_start_date )               | No      | number | No         | -          | ТЗ хүчинтэй хугацаа эхлэх огноо                                                 |
 | + [end_date](#payload_end_date )                   | No      | number | No         | -          | ТЗ хүчинтэй хугацаа дуусах огноо                                                |
 | + [owner_id](#payload_owner_id )                   | No      | string | No         | -          | Тусгай зөвшөөрөл эзэмшигч ААН -н регистр                                        |
@@ -66,7 +67,16 @@
 
 **Description:** ТЗ-ийн гэрчилгээний дугаар
 
-### <a name="payload_start_date"></a>1.3. Property `root > payload > start_date`
+### <a name="payload_license_type"></a>1.3. Property `root > payload > license_type`
+
+|              |          |
+| ------------ | -------- |
+| **Type**     | `string` |
+| **Required** | Yes      |
+
+**Description:** ТЗ-ийн төрөл. Жишээ: Барилга угсралт
+
+### <a name="payload_start_date"></a>1.4. Property `root > payload > start_date`
 
 |              |          |
 | ------------ | -------- |
@@ -75,7 +85,7 @@
 
 **Description:** ТЗ хүчинтэй хугацаа эхлэх огноо
 
-### <a name="payload_end_date"></a>1.4. Property `root > payload > end_date`
+### <a name="payload_end_date"></a>1.5. Property `root > payload > end_date`
 
 |              |          |
 | ------------ | -------- |
@@ -84,7 +94,7 @@
 
 **Description:** ТЗ хүчинтэй хугацаа дуусах огноо
 
-### <a name="payload_owner_id"></a>1.5. Property `root > payload > owner_id`
+### <a name="payload_owner_id"></a>1.6. Property `root > payload > owner_id`
 
 |              |          |
 | ------------ | -------- |
@@ -93,7 +103,7 @@
 
 **Description:** Тусгай зөвшөөрөл эзэмшигч ААН -н регистр
 
-### <a name="payload_owner_name"></a>1.6. Property `root > payload > owner_name`
+### <a name="payload_owner_name"></a>1.7. Property `root > payload > owner_name`
 
 |              |          |
 | ------------ | -------- |
@@ -102,7 +112,7 @@
 
 **Description:** Тусгай зөвшөөрөл эзэмшигч ААН -н нэр
 
-### <a name="payload_description"></a>1.7. Property `root > payload > description`
+### <a name="payload_description"></a>1.8. Property `root > payload > description`
 
 |              |          |
 | ------------ | -------- |
@@ -111,7 +121,7 @@
 
 **Description:** Тайлбар /нэмэлт мэдээлэл/
 
-### <a name="payload_state"></a>1.8. Property `root > payload > state`
+### <a name="payload_state"></a>1.9. Property `root > payload > state`
 
 |              |          |
 | ------------ | -------- |
@@ -140,4 +150,4 @@
 **Description:** Хариу буцаах URL
 
 ----------------------------------------------------------------------------------------------------------------------------
-Generated using [json-schema-for-humans](https://github.com/coveooss/json-schema-for-humans) on 2023-11-10 at 11:53:09 +0800
+Generated using [json-schema-for-humans](https://github.com/coveooss/json-schema-for-humans) on 2023-12-05 at 12:04:37 +0800

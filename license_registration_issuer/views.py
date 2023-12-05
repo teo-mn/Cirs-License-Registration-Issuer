@@ -49,11 +49,10 @@ class BasicView(generics.GenericAPIView):
 
     def save_instance(self):
         data = self.request.data
-        # TODO:
-        # if Request.objects.filter(id=data['request_id']).count() > 0:
-        #     raise ValidationErrorDjango({"error_msg": '[request_id] already exists'})
+        if Request.objects.filter(id=data['request_id']).count() > 0:
+            raise ValidationErrorDjango({"error_msg": '[request_id] already exists'})
         instance = Request.objects.create(
-            # id=data['request_id'],
+            id=data['request_id'],
             request_type=self.defaultType,
             callback_url=data['callback_url'],
             data=json.dumps(data['payload'])
@@ -118,3 +117,29 @@ class RemoveRequirementView(BasicView):
 
     def add_to_queue(self, request_id):
         remove_requirement_task.delay(request_id)
+
+
+class RetryView(generics.GenericAPIView):
+    def post(self, request, *args, **kwargs):
+        if 'request_id' not in request.data:
+            raise ValidationErrorDjango({"error_msg": '[request_id] is required'})
+        try:
+            req = Request.objects.get(id=request.data['request_id'])
+            if req.request_type == RequestType.REGISTER:
+                register_task.delay(req.id)
+            elif req.request_type == RequestType.REVOKE:
+                revoke_task.delay(req.id)
+            elif req.request_type == RequestType.UPDATE_DURATION:
+                update_task.delay(req.id)
+            elif req.request_type == RequestType.ADD_EMPLOYEE:
+                add_employee_task.delay(req.id)
+            elif req.request_type == RequestType.REMOVE_EMPLOYEE:
+                remove_employee_task.delay(req.id)
+            elif req.request_type == RequestType.ADD_REQUIREMENT:
+                add_requirement_task.delay(req.id)
+            elif req.request_type == RequestType.REMOVE_REQUIREMENT:
+                remove_requirement_task.delay(req.id)
+
+        except Request.DoesNotExist:
+            raise ValidationErrorDjango({"error_msg": 'Request not found'})
+        return HttpResponse(status=201)
