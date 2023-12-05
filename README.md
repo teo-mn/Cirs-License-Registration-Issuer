@@ -16,6 +16,10 @@ gunicorn --workers 1 --threads 3 --worker-connections 10 -b :1010 license_regist
 ```
 celery -A license_registration_issuer worker --beat -l info --scheduler django_celery_beat.schedulers:DatabaseScheduler --pool=solo --concurrency=1
 ```
+
+### API Documentation
+[https://github.com/teo-mn/Cirs-License-Registration-Issuer/wiki]
+
 ### Орчины мэдээлэл
 
 #### Блокчэйнтэй холбоотой
