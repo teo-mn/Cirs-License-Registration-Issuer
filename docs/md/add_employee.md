@@ -1,4 +1,5 @@
-# Schema Docs
+# ТЗ ИТА-ийн шилжилт орлуулах хүсэлтийн схем
+**Description:** ТЗ-тэй ААНБ-ын хасагдсан заалтан дээр орлуулах ИТА
 
 - [1. Property `root > payload`](#payload)
   - [1.1. Property `root > payload > state`](#payload_state)
@@ -34,8 +35,6 @@
 | **Type**                  | `object`                                                                  |
 | **Required**              | Yes                                                                       |
 | **Additional properties** | [[Any type: allowed]](# "Additional Properties of any type are allowed.") |
-
-**Description:** Бүртгэх дата
 
 | Property                                     | Pattern | Type   | Deprecated | Definition | Title/Description                                                               |
 | -------------------------------------------- | ------- | ------ | ---------- | ---------- | ------------------------------------------------------------------------------- |

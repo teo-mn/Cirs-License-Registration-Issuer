@@ -1,4 +1,6 @@
-# Schema Docs
+# ТЗ ИТА-ийн шилжилт хасах хүсэлтийн схем
+
+**Description:** ТЗ-тэй ААНБ-аас ИТА хасах
 
 - [1. Property `root > payload`](#payload)
   - [1.1. Property `root > payload > state`](#payload_state)
@@ -18,8 +20,6 @@
 | **Type**                  | `object`                                                                  |
 | **Required**              | No                                                                        |
 | **Additional properties** | [[Any type: allowed]](# "Additional Properties of any type are allowed.") |
-
-**Description:** ТЗ-тэй ААНБ-аас ИТА хасах
 
 | Property                         | Pattern | Type   | Deprecated | Definition | Title/Description |
 | -------------------------------- | ------- | ------ | ---------- | ---------- | ----------------- |

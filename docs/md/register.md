@@ -1,4 +1,5 @@
-# Schema Docs
+# ТЗ шинээр бүртгэх
+**Description:** ТЗ бүртгэх хүсэлтийн схем
 
 - [1. Property `root > payload`](#payload)
   - [1.1. Property `root > payload > license_system_id`](#payload_license_system_id)
@@ -47,8 +48,6 @@
 | **Type**                  | `object`                                                                  |
 | **Required**              | Yes                                                                       |
 | **Additional properties** | [[Any type: allowed]](# "Additional Properties of any type are allowed.") |
-
-**Description:** Бүртгэх дата
 
 | Property                                           | Pattern | Type            | Deprecated | Definition | Title/Description                                                               |
 | -------------------------------------------------- | ------- | --------------- | ---------- | ---------- | ------------------------------------------------------------------------------- |

@@ -1,4 +1,6 @@
-# Schema Docs
+# ТЗ сунгалт хийх хүсэлтийн схем
+
+**Description:** Тусгай зөвшөөрлийн сунгалт /Хүчинтэй хугацаа сунгах/
 
 - [1. Property `root > payload`](#payload)
   - [1.1. Property `root > payload > license_system_id`](#payload_license_system_id)
@@ -18,8 +20,6 @@
 | **Type**                  | `object`                                                                  |
 | **Required**              | No                                                                        |
 | **Additional properties** | [[Any type: allowed]](# "Additional Properties of any type are allowed.") |
-
-**Description:** Тусгай зөвшөөрлийн сунгалт /Хүчинтэй хугацаа сунгах/
 
 | Property                         | Pattern | Type   | Deprecated | Definition | Title/Description |
 | -------------------------------- | ------- | ------ | ---------- | ---------- | ----------------- |
