@@ -36,8 +36,8 @@ class TestView(generics.GenericAPIView):
         return HttpResponse(json.dumps(request.data), headers={"Content-Type": "application/json"})
 
     def get(self, request):
-        # b = BlockSyncer()
-        # b.syn_new_blocks()
+        b = BlockSyncer()
+        b.syn_new_blocks()
         return HttpResponse('')
 
 

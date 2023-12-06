@@ -39,8 +39,20 @@ class EventType(models.TextChoices):
             return EventType.EVIDENCE_REVOKED
 
 
+class LicenseProduct(models.Model):
+    id = models.CharField(max_length=128, primary_key=True, default=uuid.uuid4)
+    created_at = models.DateTimeField(auto_now_add=True, null=True)
+    updated_at = models.DateTimeField(auto_now=True, null=True)
+    name = models.CharField(max_length=255)
+    license_address = models.CharField(max_length=128, unique=True)
+    requirement_address = models.CharField(max_length=128)
+    kv_address = models.CharField(max_length=128)
+    is_active = models.BooleanField(default=True)
+
+
 class EventLog(models.Model):
     id = models.CharField(max_length=128, primary_key=True, default=uuid.uuid4)
+    product = models.ForeignKey(LicenseProduct, on_delete=models.CASCADE, null=True)
     created_at = models.DateTimeField(auto_now_add=True, null=True)
     updated_at = models.DateTimeField(auto_now=True, null=True)
     tx = models.CharField(max_length=128)
@@ -48,7 +60,6 @@ class EventLog(models.Model):
         choices=EventType.choices,
         max_length=32)
     block_number = models.IntegerField()
-    contract_address = models.CharField(max_length=128)
     timestamp = models.IntegerField()
     license_id = models.CharField(max_length=1024, default='', blank=True)
     license_name = models.CharField(max_length=1024, default='', blank=True)
@@ -64,19 +75,9 @@ class EventLog(models.Model):
     value = models.CharField(max_length=1024, default='', blank=True)
 
 
-class LicenseProduct(models.Model):
-    id = models.CharField(max_length=128, primary_key=True, default=uuid.uuid4)
-    created_at = models.DateTimeField(auto_now_add=True, null=True)
-    updated_at = models.DateTimeField(auto_now=True, null=True)
-    name = models.CharField(max_length=255)
-    license_address = models.CharField(max_length=128, unique=True)
-    requirement_address = models.CharField(max_length=128)
-    kv_address = models.CharField(max_length=128)
-    is_active = models.BooleanField(default=True)
-
-
 class License(models.Model):
     id = models.CharField(max_length=128, primary_key=True, default=uuid.uuid4)
+    product = models.ForeignKey(LicenseProduct, on_delete=models.CASCADE, null=True)
     created_at = models.DateTimeField(auto_now_add=True, null=True)
     updated_at = models.DateTimeField(auto_now=True, null=True)
     license_id = models.CharField(max_length=1024, default='', blank=True)
@@ -91,11 +92,11 @@ class License(models.Model):
         max_length=32)
     tx = models.CharField(max_length=128)
     timestamp = models.IntegerField(default=0)
-    contract_address = models.CharField(max_length=1288, default='')
 
 
 class LicenseRequirements(models.Model):
     id = models.CharField(max_length=128, primary_key=True, default=uuid.uuid4)
+    product = models.ForeignKey(LicenseProduct, on_delete=models.CASCADE, null=True)
     created_at = models.DateTimeField(auto_now_add=True, null=True)
     updated_at = models.DateTimeField(auto_now=True, null=True)
     license_id = models.CharField(max_length=1024, default='', blank=True)
@@ -107,11 +108,11 @@ class LicenseRequirements(models.Model):
         max_length=32)
     tx = models.CharField(max_length=128)
     timestamp = models.IntegerField(default=0)
-    contract_address = models.CharField(max_length=1288, default='')
 
 
 class Evidence(models.Model):
     id = models.CharField(max_length=128, primary_key=True, default=uuid.uuid4)
+    product = models.ForeignKey(LicenseProduct, on_delete=models.CASCADE, null=True)
     created_at = models.DateTimeField(auto_now_add=True, null=True)
     updated_at = models.DateTimeField(auto_now=True, null=True)
     license_id = models.CharField(max_length=1024, default='', blank=True)
@@ -121,7 +122,6 @@ class Evidence(models.Model):
     value = models.CharField(max_length=1024, default='', blank=True)
     additional_data = models.CharField(max_length=1024, default='', blank=True)
     timestamp = models.IntegerField(default=0)
-    contract_address = models.CharField(max_length=128, default='')
     state = models.CharField(
         choices=BlockchainState.choices,
         max_length=32)

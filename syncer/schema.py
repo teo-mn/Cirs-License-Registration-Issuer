@@ -15,13 +15,13 @@ class LicenseNode(DjangoObjectType):
     class Meta:
         model = License
         fields = ("id", "tx", "state", "license_id", "license_name", "owner_id", "owner_name",
-                  "start_date", "end_date", "additional_data", "timestamp", "contract_address")
+                  "start_date", "end_date", "additional_data", "timestamp", "product")
 
 
 class EvidenceNode(DjangoObjectType):
     class Meta:
         model = Evidence
-        fields = ("id", "evidence_id", "state", "license_id", "requirement_id")
+        fields = ("id", "evidence_id", "state", "license_id", "requirement_id", "product")
 
 
 class RequirementNode(DjangoObjectType):
@@ -29,12 +29,12 @@ class RequirementNode(DjangoObjectType):
 
     class Meta:
         model = LicenseRequirements
-        fields = ("id", "tx", "requirement_id", "requirement_name", "state", "evidences", "license_id")
+        fields = ("id", "tx", "requirement_id", "requirement_name", "state", "evidences", "license_id", "product")
 
     def resolve_evidences(self, info):
         return Evidence.objects.filter(requirement_id=self.requirement_id,
                                        license_id=self.license_id,
-                                       contract_address=self.contract_address).all()
+                                       product__id=self.product.id).all()
 
 
 class LogNode(DjangoObjectType):
@@ -82,11 +82,11 @@ class QueryLicenses(graphene.ObjectType):
             )
         else:
             query = License.objects
-        return query.filter(contract_address=license_address).order_by('-created_at').all()
+        return query.filter(product__license_address=license_address).order_by('-created_at').all()
 
     def resolve_license(self, info, license_address, license_id):
         try:
-            return License.objects.get(contract_address=license_address, license_id=license_id)
+            return License.objects.get(product__license_address=license_address, license_id=license_id)
         except License.DoesNotExist:
             return None
 
@@ -95,11 +95,7 @@ class QueryRequirements(graphene.ObjectType):
     requirements = graphene.List(RequirementNode, license_address=graphene.String(), license_id=graphene.String())
 
     def resolve_requirements(self, info, license_address, license_id):
-        try:
-            product = LicenseProduct.objects.get(license_address=license_address)
-        except LicenseProduct.DoesNotExist:
-            return []
-        return LicenseRequirements.objects.filter(contract_address=product.requirement_address,
+        return LicenseRequirements.objects.filter(product__license_address=license_address,
                                                   license_id=license_id).all()
 
 
@@ -139,19 +135,12 @@ class QueryEvidences(graphene.ObjectType):
 
 
 class Query(QueryProducts, QueryLicenses, QueryRequirements, QueryEvidences):
-    logs = graphene.List(LogNode, license_address=graphene.String(),
-                         license_id=graphene.String())
+    logs = graphene.List(LogNode, license_address=graphene.String(required=True),
+                         license_id=graphene.String(required=True))
 
     def resolve_logs(self, info, license_address, license_id):
-        try:
-            product = LicenseProduct.objects.get(license_address=license_address)
-        except LicenseProduct.DoesNotExist:
-            return []
-        return EventLog.objects.filter(
-            Q(contract_address=product.license_address)
-            | Q(contract_address=product.requirement_address)
-            | Q(contract_address=product.kv_address)
-        ).filter(license_id=license_id).order_by('-timestamp').all()
+        return EventLog.objects.filter(product__license_address=license_address)\
+            .filter(license_id=license_id).order_by('-timestamp').all()
 
 
 schema = graphene.Schema(query=Query)

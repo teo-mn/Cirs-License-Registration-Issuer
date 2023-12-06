@@ -14,14 +14,14 @@ from syncer.models import EventLog, EventType, LicenseProduct, LatestSyncedBlock
 logger = logging.getLogger(__name__)
 
 
-def handle_license(event: EventData, block: BlockData):
+def handle_license(event: EventData, block: BlockData, product: LicenseProduct):
     if EventType.from_name(event['event']) == EventType.LICENSE_REGISTERED:
-        instance = License.objects.filter(contract_address=event['address'],
+        instance = License.objects.filter(product__id=product.id,
                                           license_id=event['args']['licenseID'].decode()) \
             .first()
         if instance is None:
             instance = License.objects.create(
-                contract_address=event['address'],
+                product=product,
                 license_id=event['args']['licenseID'].decode(),
                 license_name=event['args']['licenseName'].decode(),
                 owner_id=event['args']['ownerID'].decode(),
@@ -33,7 +33,7 @@ def handle_license(event: EventData, block: BlockData):
                 state=BlockchainState.REGISTERED
             )
         elif instance.timestamp < block['timestamp']:
-            instance.contract_address = event['address']
+            instance.product = product
             instance.license_id = event['args']['licenseID'].decode()
             instance.license_name = event['args']['licenseName'].decode()
             instance.owner_id = event['args']['ownerID'].decode()
@@ -45,12 +45,12 @@ def handle_license(event: EventData, block: BlockData):
             instance.state = BlockchainState.REGISTERED
         instance.save()
     elif EventType.from_name(event['event']) == EventType.LICENSE_REVOKED:
-        instance = License.objects.filter(contract_address=event['address'],
+        instance = License.objects.filter(product__id=product.id,
                                           license_id=event['args']['licenseID'].decode()).first()
         if instance is None:
             logger.warning('Unexpected case')
             instance = License.objects.create(
-                contract_address=event['address'],
+                product=product,
                 license_id=event['args']['licenseID'].decode(),
                 license_name=event['args']['licenseName'].decode(),
                 state=BlockchainState.REVOKED,
@@ -62,25 +62,24 @@ def handle_license(event: EventData, block: BlockData):
         instance.save()
 
 
-def handle_requirement(event: EventData, block: BlockData):
+def handle_requirement(event: EventData, block: BlockData, product: LicenseProduct):
     if EventType.from_name(event['event']) == EventType.REQUIREMENT_REGISTERED:
-        instance = LicenseRequirements.objects.filter(contract_address=event['address'],
+        instance = LicenseRequirements.objects.filter(product__id=product.id,
                                                       license_id=event['args']['licenseID'].decode(),
                                                       requirement_id=event['args']['requirementID'].decode()) \
             .first()
         if instance is None:
             instance = LicenseRequirements.objects.create(
-                contract_address=event['address'],
+                product=product,
                 license_id=event['args']['licenseID'].decode(),
                 requirement_id=event['args']['requirementID'].decode(),
                 requirement_name=event['args']['requirementName'].decode(),
                 additional_data=event['args']['additionalData'].decode(),
                 state=BlockchainState.REGISTERED,
-                timestamp=block['timestamp'],
-                license_address=''
+                timestamp=block['timestamp']
             )
         elif instance.timestamp < block['timestamp']:
-            instance.contract_address = event['address']
+            instance.product = product
             instance.license_id = event['args']['licenseID'].decode()
             instance.requirement_id = event['args']['requirementID'].decode()
             instance.requirement_name = event['args']['requirementName'].decode()
@@ -89,17 +88,16 @@ def handle_requirement(event: EventData, block: BlockData):
             instance.timestamp = block['timestamp']
         instance.save()
     elif EventType.from_name(event['event']) == EventType.REQUIREMENT_REVOKED:
-        instance = License.objects.filter(contract_address=event['address'],
+        instance = License.objects.filter(product__id=product.id,
                                           license_id=event['args']['licenseID'].decode(),
                                           requirement_id=event['args']['requirementID'].decode()).first()
         if instance is None:
             logger.warning('Unexpected case')
             instance = LicenseRequirements.objects.create(
-                contract_address=event['address'],
+                product=product,
                 license_id=event['args']['licenseID'].decode(),
                 requirement_id=event['args']['requirementID'].decode(),
                 state=BlockchainState.REVOKED,
-                license_address='',
                 timestamp=block['timestamp']
             )
         elif instance.timestamp < block['timestamp']:
@@ -108,16 +106,16 @@ def handle_requirement(event: EventData, block: BlockData):
         instance.save()
 
 
-def handle_evidence(event: EventData, block: BlockData):
+def handle_evidence(event: EventData, block: BlockData, product: LicenseProduct):
     if EventType.from_name(event['event']) == EventType.EVIDENCE_REGISTERED:
-        instance = Evidence.objects.filter(contract_address=event['address'],
+        instance = Evidence.objects.filter(product__id=product.id,
                                            license_id=event['args']['licenseID'].decode(),
                                            requirement_id=event['args']['requirementID'].decode(),
                                            evidence_id=event['args']['evidenceID']
                                            ).first()
         if instance is None:
             instance = Evidence.objects.create(
-                contract_address=event['address'],
+                product=product,
                 license_id=event['args']['licenseID'].decode(),
                 requirement_id=event['args']['requirementID'].decode(),
                 evidence_id=event['args']['evidenceID'].decode(),
@@ -126,7 +124,7 @@ def handle_evidence(event: EventData, block: BlockData):
                 state=BlockchainState.REGISTERED
             )
         elif instance.timestamp < block['timestamp']:
-            instance.contract_address = event['address']
+            instance.product = product
             instance.license_id = event['args']['licenseID'].decode()
             instance.requirement_id = event['args']['requirementID'].decode()
             instance.evidence_id = event['args']['evidenceID'].decode()
@@ -135,14 +133,14 @@ def handle_evidence(event: EventData, block: BlockData):
             instance.state = BlockchainState.REGISTERED
         instance.save()
     elif EventType.from_name(event['event']) == EventType.EVIDENCE_REVOKED:
-        instance = License.objects.filter(contract_address=event['address'],
+        instance = License.objects.filter(product__id=product.id,
                                           license_id=event['args']['licenseID'].decode(),
                                           requirement_id=event['args']['requirementID'].decode(),
                                           evidence_id=event['args']['evidenceID']).first()
         if instance is None:
             logger.warning('Unexpected case')
             instance = Evidence.objects.create(
-                contract_address=event['address'],
+                product=product,
                 license_id=event['args']['licenseID'].decode(),
                 requirement_id=event['args']['requirementID'].decode(),
                 evidence_id=event['args']['evidenceID'].decode(),
@@ -155,17 +153,18 @@ def handle_evidence(event: EventData, block: BlockData):
         instance.save()
 
 
-def handle_event(event: EventData, block: BlockData):
-    if EventLog.objects.filter(tx=event['transactionHash'].hex(),
+def handle_event(event: EventData, block: BlockData, product: LicenseProduct):
+    if EventLog.objects.filter(product__id=product.id, tx=event['transactionHash'].hex(),
                                log_type=EventType.from_name(event['event'])).count() > 0:
-        instance = EventLog.objects.get(tx=event['transactionHash'].hex(), log_type=EventType.from_name(event['event']))
+        instance = EventLog.objects.get(product__id=product.id, tx=event['transactionHash'].hex(),
+                                        log_type=EventType.from_name(event['event']))
     else:
         instance = EventLog.objects.create(
+            product=product,
             tx=event['transactionHash'].hex(),
             block_number=block['number'],
             log_type=EventType.from_name(event['event']),
-            timestamp=block['timestamp'],
-            contract_address=event['address']
+            timestamp=block['timestamp']
         )
     if instance.log_type == EventType.SET_DATA:
         instance.key = event['args']['key'].decode()
@@ -201,9 +200,9 @@ def handle_event(event: EventData, block: BlockData):
         instance.evidence_id = event['args']['evidenceID'].decode()
         instance.additional_data = event['args']['additionalData'].decode()
     instance.save()
-    handle_license(event, block)
-    handle_requirement(event, block)
-    handle_evidence(event, block)
+    handle_license(event, block, product)
+    handle_requirement(event, block, product)
+    handle_evidence(event, block, product)
 
 
 def handle_register_product_event(event):
@@ -248,11 +247,11 @@ class BlockSyncer:
     def get_latest_block(self):
         return self.web3.eth.get_block_number()
 
-    def handle_event(self, event: EventData):
+    def handle_event(self, event: EventData, product: LicenseProduct):
         logger.debug('Syncer found new event: ')
         logger.debug(event)
         block = self.web3.eth.get_block(event['blockNumber'])
-        handle_event(event, block)
+        handle_event(event, block, product)
 
     def sync_products(self, from_block, to_block):
         logger.debug('Syncing product contract from: ' + str(from_block) + ' to: ' + str(to_block))
@@ -267,7 +266,8 @@ class BlockSyncer:
         for product in self.products:
             license_contract = self.web3.eth.contract(address=product.license_address, abi=license_abi)
             self.sync_events(from_block, to_block, self.handle_event,
-                             [license_contract.events.LicenseRegistered, license_contract.events.LicenseRevoked])
+                             [license_contract.events.LicenseRegistered, license_contract.events.LicenseRevoked],
+                             product)
 
     def sync_requirements(self, from_block, to_block):
         logger.debug('Syncing requirement contract from: ' + str(from_block) + ' to: ' + str(to_block))
@@ -277,22 +277,22 @@ class BlockSyncer:
                              [requirement_contract.events.LicenseRequirementRegistered,
                               requirement_contract.events.LicenseRequirementRevoked,
                               requirement_contract.events.EvidenceRegistered,
-                              requirement_contract.events.EvidenceRevoked])
+                              requirement_contract.events.EvidenceRevoked], product)
 
     def sync_kv(self, from_block, to_block):
         logger.debug('Syncing kv contract from: ' + str(from_block) + ' to: ' + str(to_block))
         for product in self.products:
             kv_contract = self.web3.eth.contract(address=product.kv_address, abi=kv_abi)
-            self.sync_events(from_block, to_block, self.handle_event, [kv_contract.events.SetData])
+            self.sync_events(from_block, to_block, self.handle_event, [kv_contract.events.SetData], product)
 
-    def sync_events(self, from_block, to_block, handler, event_functions):
+    def sync_events(self, from_block, to_block, handler, event_functions, product: LicenseProduct):
         for event_function in event_functions:
             event_filter = event_function.create_filter(
                 fromBlock=self.web3.to_hex(from_block),
                 toBlock=self.web3.to_hex(to_block)
             )
             for event in event_filter.get_all_entries():
-                handler(event)
+                handler(event, product)
 
     def sync_new_block_range(self, from_block, to_block):
         logger.info('Syncing block from: ' + str(from_block) + ', to: ' + str(to_block))
