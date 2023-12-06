@@ -5,9 +5,8 @@ services:
     image: rabbitmq:3-management-alpine
     container_name: rabbitmq
     restart: always
-    ports:
-    - 5672:5672
-    - 15672:15672
+    networks:
+      - license-vpc
   issuer_api:
     container_name: issuer_api
     image: corexchain/cirs-license-issuer
@@ -19,6 +18,8 @@ services:
       - "./db/:/db"
     depends_on:
       - rabbitmq
+    networks:
+      - license-vpc
     env_file:
       - ./issuer.env
     command:
@@ -29,6 +30,9 @@ services:
     restart: always
     depends_on:
       - rabbitmq
+      - issuer_api
+    networks:
+      - license-vpc
     volumes:
       - "./staticfiles/static:/code/content/static"
       - "./db/:/db"
@@ -36,3 +40,6 @@ services:
       - ./issuer.env
     command:
       sh -c "/code/run_celery.sh"
+
+  networks:
+    license-vpc:

@@ -25,7 +25,7 @@ env = environ.Env(
     DEBUG=(bool, False)
 )
 
-DEBUG = env.get_value('DEBUG', bool, True)
+DEBUG = env.get_value('DEBUG', bool, False)
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = env.get_value('SECRET_KEY', str, 'django-insecure-b6%@==j2_fn&mga5b!=u*u$6y@7*as&d5tw1!8ue*lp_x=*c0p')
 # SECURITY WARNING: don't run with debug turned on in production!
