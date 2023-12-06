@@ -108,27 +108,26 @@ class EvidenceDetailNode(graphene.ObjectType):
         if self['evidence_id'] is None or self['evidence_id'] == '':
             return []
         # TODO: join query
-        return License.objects.filter(contract_address=self['license_address'])
+        return License.objects.filter(product__license_address=self['license_address'])
 
     def resolve_requirements(self, info, license_id):
         if self['evidence_id'] is None or self['evidence_id'] == '':
             return []
         # TODO: join query
-        try:
-            product = LicenseProduct.objects.get(license_address=self['license_address'])
-        except LicenseProduct.DoesNotExist:
-            return []
-        return LicenseRequirements.objects.filter(contract_address=product.requirement_address, license_id=license_id)
+        return LicenseRequirements.objects.filter(product__license_address=self['license_address'],
+                                                  license_id=license_id)
 
     def resolve_logs(self, info):
         # TODO: join query
         if self['evidence_id'] is None or self['evidence_id'] == '':
             return []
-        return EventLog.objects.filter(evidence_id=self['evidence_id'])
+        return EventLog.objects.filter(product__license_address=self['license_address'],
+                                       evidence_id=self['evidence_id'])
 
 
 class QueryEvidences(graphene.ObjectType):
-    evidence = graphene.Field(EvidenceDetailNode, license_address=graphene.String(), evidence_id=graphene.String())
+    evidence = graphene.Field(EvidenceDetailNode, license_address=graphene.String(required=True),
+                              evidence_id=graphene.String(required=True))
 
     def resolve_evidence(self, info, license_address, evidence_id):
         return {'license_address': license_address, 'evidence_id': evidence_id}
