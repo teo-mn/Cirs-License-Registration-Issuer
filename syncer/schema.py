@@ -11,17 +11,10 @@ class LicenseProductNode(DjangoObjectType):
         fields = ("id", "name", "license_address", "requirement_address", "kv_address")
 
 
-class LicenseNode(DjangoObjectType):
-    class Meta:
-        model = License
-        fields = ("id", "tx", "state", "license_id", "license_name", "owner_id", "owner_name",
-                  "start_date", "end_date", "additional_data", "timestamp", "product")
-
-
 class EvidenceNode(DjangoObjectType):
     class Meta:
         model = Evidence
-        fields = ("id", "evidence_id", "state", "license_id", "requirement_id", "product")
+        fields = ("id", "evidence_id", "timestamp",  "state", "license_id", "requirement_id", "product")
 
 
 class RequirementNode(DjangoObjectType):
@@ -29,7 +22,7 @@ class RequirementNode(DjangoObjectType):
 
     class Meta:
         model = LicenseRequirements
-        fields = ("id", "tx", "requirement_id", "requirement_name", "state", "evidences", "license_id", "product")
+        fields = ("id", "tx", "timestamp", "requirement_id", "requirement_name", "state", "evidences", "license_id", "product")
 
     def resolve_evidences(self, info):
         return Evidence.objects.filter(requirement_id=self.requirement_id,
@@ -37,11 +30,24 @@ class RequirementNode(DjangoObjectType):
                                        product__id=self.product.id).all()
 
 
+class LicenseNode(DjangoObjectType):
+    requirements = graphene.List(RequirementNode)
+
+    class Meta:
+        model = License
+        fields = ("id", "tx", "state", "license_id", "license_name", "owner_id", "owner_name",
+                  "start_date", "end_date", "additional_data", "timestamp", "product")
+
+    def resolve_requirements(self, info):
+        return LicenseRequirements.objects.filter(license_id=self.license_id, product__id=self.product.id).all()
+
+
 class LogNode(DjangoObjectType):
     class Meta:
         model = EventLog
-        fields = ("id", "tx", "license_id", "license_name", "owner_id", "owner_name",
-                  "start_date", "end_date", "additional_data", "timestamp", "log_type")
+        fields = ("id", "tx", "timestamp", "license_id", "license_name", "owner_id", "owner_name",
+                  "start_date", "end_date", "additional_data", "timestamp", "log_type",
+                  "requirement_id", "requirement_name", "evidence_id", "key", "value")
 
 
 class QueryProducts(graphene.ObjectType):
@@ -70,7 +76,7 @@ class QueryLicenses(graphene.ObjectType):
     licenses = graphene.List(LicenseNode, license_address=graphene.String(), search=graphene.String(required=False))
     license = graphene.Field(LicenseNode, license_address=graphene.String(), license_id=graphene.String())
 
-    def resolve_licenses(root, info, license_address, search=''):
+    def resolve_licenses(self, info, license_address, search=''):
         # We can easily optimize query count in the resolve method
         if search is not None and search != '':
             query = License.objects.filter(
@@ -122,7 +128,7 @@ class EvidenceDetailNode(graphene.ObjectType):
         if self['evidence_id'] is None or self['evidence_id'] == '':
             return []
         return EventLog.objects.filter(product__license_address=self['license_address'],
-                                       evidence_id=self['evidence_id'])
+                                       evidence_id=self['evidence_id']).all()
 
 
 class QueryEvidences(graphene.ObjectType):
@@ -138,7 +144,7 @@ class Query(QueryProducts, QueryLicenses, QueryRequirements, QueryEvidences):
                          license_id=graphene.String(required=True))
 
     def resolve_logs(self, info, license_address, license_id):
-        return EventLog.objects.filter(product__license_address=license_address)\
+        return EventLog.objects.filter(product__license_address=license_address) \
             .filter(license_id=license_id).order_by('-timestamp').all()
 
 
