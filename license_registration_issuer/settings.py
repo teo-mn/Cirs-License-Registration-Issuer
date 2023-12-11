@@ -110,8 +110,12 @@ WSGI_APPLICATION = 'license_registration_issuer.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
+        'ENGINE': env.get_value('DB_ENGINE', str, 'django.db.backends.sqlite3'),
         'NAME': env.get_value('DB_NAME', str, 'db.sqlite3'),
+        'USER': env.get_value('DB_USER', str, ''),
+        'PASSWORD': env.get_value('DB_PASSWORD', str, ''),
+        'HOST': env.get_value('DB_HOST', str, ''),
+        'PORT': env.get_value('DB_PORT', str, '')
     }
 }
 
