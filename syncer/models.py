@@ -122,6 +122,7 @@ class Evidence(models.Model):
     value = models.CharField(max_length=1024, default='', blank=True)
     additional_data = models.CharField(max_length=1024, default='', blank=True)
     timestamp = models.IntegerField(default=0)
+    tx = models.CharField(max_length=128, default='')
     state = models.CharField(
         choices=BlockchainState.choices,
         max_length=32)

@@ -14,7 +14,8 @@ class LicenseProductNode(DjangoObjectType):
 class EvidenceNode(DjangoObjectType):
     class Meta:
         model = Evidence
-        fields = ("id", "evidence_id", "timestamp",  "state", "license_id", "requirement_id", "product")
+        fields = ("id", "evidence_id", "tx", "timestamp", "state", "license_id", "requirement_id",
+                  "product", "additional_data")
 
 
 class RequirementNode(DjangoObjectType):
@@ -22,7 +23,8 @@ class RequirementNode(DjangoObjectType):
 
     class Meta:
         model = LicenseRequirements
-        fields = ("id", "tx", "timestamp", "requirement_id", "requirement_name", "state", "evidences", "license_id", "product")
+        fields = ("id", "tx", "timestamp", "requirement_id", "requirement_name", "state", "evidences",
+                  "license_id", "product", "additional_data")
 
     def resolve_evidences(self, info):
         return Evidence.objects.filter(requirement_id=self.requirement_id,
@@ -36,7 +38,7 @@ class LicenseNode(DjangoObjectType):
     class Meta:
         model = License
         fields = ("id", "tx", "state", "license_id", "license_name", "owner_id", "owner_name",
-                  "start_date", "end_date", "additional_data", "timestamp", "product")
+                  "start_date", "end_date", "additional_data", "timestamp", "product", "additional_data")
 
     def resolve_requirements(self, info):
         return LicenseRequirements.objects.filter(license_id=self.license_id, product__id=self.product.id).all()
@@ -106,25 +108,17 @@ class QueryRequirements(graphene.ObjectType):
 
 
 class EvidenceDetailNode(graphene.ObjectType):
-    licenses = graphene.List(LicenseNode)
-    requirements = graphene.List(RequirementNode, license_id=graphene.String())
+    evidences = graphene.List(EvidenceNode)
+    # requirements = graphene.List(RequirementNode, license_id=graphene.String(required=True))
     logs = graphene.List(LogNode)
 
-    def resolve_licenses(self, info):
+    def resolve_evidences(self, info):
         if self['evidence_id'] is None or self['evidence_id'] == '':
             return []
-        # TODO: join query
-        return License.objects.filter(product__license_address=self['license_address'])
-
-    def resolve_requirements(self, info, license_id):
-        if self['evidence_id'] is None or self['evidence_id'] == '':
-            return []
-        # TODO: join query
-        return LicenseRequirements.objects.filter(product__license_address=self['license_address'],
-                                                  license_id=license_id)
+        return Evidence.objects.filter(product__license_address=self['license_address'],
+                                       evidence_id=self['evidence_id'])
 
     def resolve_logs(self, info):
-        # TODO: join query
         if self['evidence_id'] is None or self['evidence_id'] == '':
             return []
         return EventLog.objects.filter(product__license_address=self['license_address'],
