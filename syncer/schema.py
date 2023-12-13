@@ -43,7 +43,7 @@ class EvidenceConnection(graphene.relay.Connection):
 
 
 class RequirementNode(DjangoObjectType):
-    evidences = graphene.relay.ConnectionField(EvidenceConnection)
+    evidences = graphene.List(EvidenceNode)
 
     class Meta:
         model = LicenseRequirements
@@ -51,7 +51,7 @@ class RequirementNode(DjangoObjectType):
         fields = ("id", "tx", "timestamp", "requirement_id", "requirement_name", "state", "evidences",
                   "license_id", "product", "additional_data")
 
-    def resolve_evidences(self, info, first=0, last=0, before=None, after=None):
+    def resolve_evidences(self, info):
         return Evidence.objects.filter(requirement_id=self.requirement_id,
                                        license_id=self.license_id,
                                        product__id=self.product.id)
