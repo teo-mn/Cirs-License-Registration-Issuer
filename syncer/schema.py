@@ -2,7 +2,7 @@ import graphene
 from django.db.models import Q
 from graphene_django import DjangoObjectType
 
-from syncer.models import LicenseProduct, License, Evidence, LicenseRequirements, EventLog
+from syncer.models import LicenseProduct, License, Evidence, LicenseRequirements, EventLog, KV
 
 
 class LicenseProductNode(DjangoObjectType):
@@ -25,12 +25,19 @@ class LicenseProductConnection(graphene.relay.Connection):
         return len(root.iterable)
 
 
+class KVNode(DjangoObjectType):
+    class Meta:
+        model = KV
+        interfaces = (graphene.relay.Node,)
+        fields = ("id", "tx", "timestamp", "key", "value")
+
+
 class EvidenceNode(DjangoObjectType):
     class Meta:
         model = Evidence
         interfaces = (graphene.relay.Node,)
         fields = ("id", "evidence_id", "tx", "timestamp", "state", "license_id", "requirement_id",
-                  "product", "additional_data")
+                  "product", "additional_data", "additional_data_kv", "evidence_kv")
 
 
 class EvidenceConnection(graphene.relay.Connection):
@@ -49,7 +56,7 @@ class RequirementNode(DjangoObjectType):
         model = LicenseRequirements
         interfaces = (graphene.relay.Node,)
         fields = ("id", "tx", "timestamp", "requirement_id", "requirement_name", "state", "evidences",
-                  "license_id", "product", "additional_data")
+                  "license_id", "product", "additional_data", "additional_data_kv")
 
     def resolve_evidences(self, info):
         return Evidence.objects.filter(requirement_id=self.requirement_id,
@@ -73,7 +80,8 @@ class LicenseNode(DjangoObjectType):
         model = License
         interfaces = (graphene.relay.Node,)
         fields = ("id", "tx", "state", "license_id", "license_name", "owner_id", "owner_name",
-                  "start_date", "end_date", "additional_data", "timestamp", "product", "additional_data")
+                  "start_date", "end_date", "additional_data", "timestamp", "product", "additional_data",
+                  "additional_data_kv")
 
     def resolve_requirements(self, info, first=0, last=0, before=None, after=None):
         return LicenseRequirements.objects.filter(license_id=self.license_id, product__id=self.product.id)
