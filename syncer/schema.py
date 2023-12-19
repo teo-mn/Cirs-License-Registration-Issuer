@@ -112,7 +112,7 @@ class LogNode(DjangoObjectType):
         model = EventLog
         interfaces = (graphene.relay.Node,)
         fields = ("id", "tx", "timestamp", "license_id", "license_name", "owner_id", "owner_name",
-                  "start_date", "end_date", "additional_data", "timestamp", "log_type",
+                  "start_date", "end_date", "additional_data", "additional_data_kv", "timestamp", "log_type",
                   "requirement_id", "requirement_name", "evidence_id", "key", "value")
 
 
