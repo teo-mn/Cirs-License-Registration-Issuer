@@ -2,7 +2,13 @@ import graphene
 from django.db.models import Q
 from graphene_django import DjangoObjectType
 
-from syncer.models import LicenseProduct, License, Evidence, LicenseRequirements, EventLog, KV
+from syncer.models import LicenseProduct, License, Evidence, LicenseRequirements, EventLog, KV, LatestSyncedBlock
+
+
+class LatestSyncedBlockNode(DjangoObjectType):
+    class Meta:
+        model = LatestSyncedBlock
+        fields = ("last_synced_block_number", "id")
 
 
 class LicenseProductNode(DjangoObjectType):
@@ -19,6 +25,7 @@ class LicenseProductNode(DjangoObjectType):
 class LicenseProductConnection(graphene.relay.Connection):
     class Meta:
         node = LicenseProductNode
+
     total_count = graphene.Int()
 
     def resolve_total_count(root, info):
@@ -43,6 +50,7 @@ class EvidenceNode(DjangoObjectType):
 class EvidenceConnection(graphene.relay.Connection):
     class Meta:
         node = EvidenceNode
+
     total_count = graphene.Int()
 
     def resolve_total_count(root, info):
@@ -67,6 +75,7 @@ class RequirementNode(DjangoObjectType):
 class RequirementConnection(graphene.relay.Connection):
     class Meta:
         node = RequirementNode
+
     total_count = graphene.Int()
 
     def resolve_total_count(root, info):
@@ -90,6 +99,7 @@ class LicenseNode(DjangoObjectType):
 class LicenseConnection(graphene.relay.Connection):
     class Meta:
         node = LicenseNode
+
     total_count = graphene.Int()
 
     def resolve_total_count(root, info):
@@ -108,6 +118,7 @@ class LogNode(DjangoObjectType):
 class LogConnection(graphene.relay.Connection):
     class Meta:
         node = LogNode
+
     total_count = graphene.Int()
 
     def resolve_total_count(root, info):
@@ -174,7 +185,7 @@ class QueryRequirements(graphene.ObjectType):
 class EvidenceDetailNode(graphene.ObjectType):
     evidences = graphene.relay.ConnectionField(EvidenceConnection)
     # requirements = graphene.List(RequirementNode, license_id=graphene.String(required=True))
-    logs = graphene.relay.ConnectionField(LogConnection)
+    logs = graphene.relay.ConnectionField(LogConnection, from_ts=graphene.Int(), to_ts=graphene.Int())
 
     def resolve_evidences(self, info, first=0, last=0, before=None, after=None):
         if self['evidence_id'] is None or self['evidence_id'] == '':
@@ -182,11 +193,16 @@ class EvidenceDetailNode(graphene.ObjectType):
         return Evidence.objects.filter(product__license_address=self['license_address'],
                                        evidence_id=self['evidence_id'])
 
-    def resolve_logs(self, info, first=0, last=0, before=None, after=None):
+    def resolve_logs(self, info, from_ts=0, to_ts=0, first=0, last=0, before=None, after=None):
         if self['evidence_id'] is None or self['evidence_id'] == '':
             return []
-        return EventLog.objects.filter(product__license_address=self['license_address'],
-                                       evidence_id=self['evidence_id'])
+        query = EventLog.objects.filter(product__license_address=self['license_address'],
+                                        evidence_id=self['evidence_id'])
+        if from_ts > 0:
+            query = query.filter(timestamp__gte=from_ts)
+        if to_ts > 0:
+            query = query.filter(timestamp__lte=to_ts)
+        return query.order_by('-timestamp')
 
 
 class QueryEvidences(graphene.ObjectType):
@@ -199,11 +215,22 @@ class QueryEvidences(graphene.ObjectType):
 
 class Query(QueryProducts, QueryLicenses, QueryRequirements, QueryEvidences):
     logs = graphene.relay.ConnectionField(LogConnection, license_address=graphene.String(required=True),
-                                          license_id=graphene.String(required=True))
+                                          license_id=graphene.String(required=True),
+                                          from_ts=graphene.Int(), to_ts=graphene.Int())
+    last_synced_block_number = graphene.Field(LatestSyncedBlockNode)
 
-    def resolve_logs(self, info, license_address, license_id, first=0, last=0, before=None, after=None):
-        return EventLog.objects.filter(product__license_address=license_address) \
-            .filter(license_id=license_id).order_by('-timestamp')
+    def resolve_logs(self, info, license_address, license_id, from_ts=0, to_ts=0,
+                     first=0, last=0, before=None, after=None):
+        query = EventLog.objects.filter(product__license_address=license_address) \
+            .filter(license_id=license_id)
+        if from_ts > 0:
+            query = query.filter(timestamp__gte=from_ts)
+        if to_ts > 0:
+            query = query.filter(timestamp__lte=to_ts)
+        return query.order_by('-timestamp')
+
+    def resolve_last_synced_block_number(self, info):
+        return LatestSyncedBlock.objects.first()
 
 
 schema = graphene.Schema(query=Query)
