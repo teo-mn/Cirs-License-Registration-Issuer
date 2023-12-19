@@ -122,6 +122,7 @@ class LicenseRequirements(models.Model):
         max_length=32)
     tx = models.CharField(max_length=128)
     timestamp = models.IntegerField(default=0)
+    license_obj = models.ForeignKey(License, on_delete=models.CASCADE, null=True)
 
 
 class Evidence(models.Model):
@@ -142,3 +143,4 @@ class Evidence(models.Model):
     state = models.CharField(
         choices=BlockchainState.choices,
         max_length=32)
+    requirement_obj = models.ForeignKey(LicenseRequirements, on_delete=models.CASCADE, null=True)

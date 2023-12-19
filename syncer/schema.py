@@ -2,7 +2,8 @@ import graphene
 from django.db.models import Q
 from graphene_django import DjangoObjectType
 
-from syncer.models import LicenseProduct, License, Evidence, LicenseRequirements, EventLog, KV, LatestSyncedBlock
+from syncer.models import LicenseProduct, License, Evidence, LicenseRequirements, EventLog, KV, LatestSyncedBlock, \
+    BlockchainState
 
 
 class LatestSyncedBlockNode(DjangoObjectType):
@@ -44,7 +45,7 @@ class EvidenceNode(DjangoObjectType):
         model = Evidence
         interfaces = (graphene.relay.Node,)
         fields = ("id", "evidence_id", "tx", "timestamp", "state", "license_id", "requirement_id",
-                  "product", "additional_data", "additional_data_kv", "evidence_kv")
+                  "product", "additional_data", "additional_data_kv", "evidence_kv", "requirement_obj")
 
 
 class EvidenceConnection(graphene.relay.Connection):
@@ -64,7 +65,7 @@ class RequirementNode(DjangoObjectType):
         model = LicenseRequirements
         interfaces = (graphene.relay.Node,)
         fields = ("id", "tx", "timestamp", "requirement_id", "requirement_name", "state", "evidences",
-                  "license_id", "product", "additional_data", "additional_data_kv")
+                  "license_id", "product", "additional_data", "additional_data_kv", "license_obj")
 
     def resolve_evidences(self, info):
         return Evidence.objects.filter(requirement_id=self.requirement_id,
@@ -183,15 +184,24 @@ class QueryRequirements(graphene.ObjectType):
 
 
 class EvidenceDetailNode(graphene.ObjectType):
-    evidences = graphene.relay.ConnectionField(EvidenceConnection)
+    evidences = graphene.relay.ConnectionField(EvidenceConnection, license_type=graphene.String())
     # requirements = graphene.List(RequirementNode, license_id=graphene.String(required=True))
     logs = graphene.relay.ConnectionField(LogConnection, from_ts=graphene.Int(), to_ts=graphene.Int())
 
-    def resolve_evidences(self, info, first=0, last=0, before=None, after=None):
+    def resolve_evidences(self, info, license_type='', first=0, last=0, before=None, after=None):
         if self['evidence_id'] is None or self['evidence_id'] == '':
             return []
-        return Evidence.objects.filter(product__license_address=self['license_address'],
-                                       evidence_id=self['evidence_id'])
+        query = Evidence.objects.filter(product__license_address=self['license_address'],
+                                        evidence_id=self['evidence_id'])
+        if license_type == 'REGISTERED':
+            query = query.filter(
+                requirement_obj__state=BlockchainState.REGISTERED,
+                requirement_obj__license_obj__state=BlockchainState.REGISTERED)
+        if license_type == 'REVOKED':
+            query = query.filter(
+                requirement_obj__state=BlockchainState.REVOKED,
+                requirement_obj__license_obj__state=BlockchainState.REVOKED)
+        return query
 
     def resolve_logs(self, info, from_ts=0, to_ts=0, first=0, last=0, before=None, after=None):
         if self['evidence_id'] is None or self['evidence_id'] == '':
