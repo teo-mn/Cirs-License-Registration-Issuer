@@ -9,9 +9,35 @@ from blockchain.abi.key_value_abi import kv_abi
 from blockchain.abi.license_abi import license_abi
 from blockchain.abi.requirement_abi import requirement_abi
 from syncer.models import EventLog, EventType, LicenseProduct, LatestSyncedBlock, License, BlockchainState, \
-    LicenseRequirements, Evidence
+    LicenseRequirements, Evidence, KV
 
 logger = logging.getLogger(__name__)
+
+
+def handle_additional_data(instance, event: EventData):
+    kv = KV.objects.filter(product__id=instance.product.id, key=event['args']['additionalData'].decode()).first()
+    if kv is None:
+        kv = KV.objects.create(
+            product=instance.product,
+            key=event['args']['additionalData'].decode(),
+            value=event['args']['additionalData'].decode(),
+            timestamp=0,
+            tx=''
+        )
+    instance.additional_data_kv = kv
+
+
+def handle_evidence_kv(instance, event: EventData):
+    kv = KV.objects.filter(product__id=instance.product.id, key=event['args']['evidenceID'].decode()).first()
+    if kv is None:
+        kv = KV.objects.create(
+            product=instance.product,
+            key=event['args']['evidenceID'].decode(),
+            value=event['args']['evidenceID'].decode(),
+            timestamp=0,
+            tx=''
+        )
+    instance.evidence_kv = kv
 
 
 def handle_license(event: EventData, block: BlockData, product: LicenseProduct):
@@ -20,20 +46,9 @@ def handle_license(event: EventData, block: BlockData, product: LicenseProduct):
                                           license_id=event['args']['licenseID'].decode()) \
             .first()
         if instance is None:
-            instance = License.objects.create(
-                product=product,
-                license_id=event['args']['licenseID'].decode(),
-                license_name=event['args']['licenseName'].decode(),
-                owner_id=event['args']['ownerID'].decode(),
-                owner_name=event['args']['ownerName'].decode(),
-                start_date=event['args']['startDate'],
-                end_date=event['args']['endDate'],
-                timestamp=block['timestamp'],
-                additional_data=event['args']['additionalData'].decode(),
-                state=BlockchainState.REGISTERED,
-                tx=event['transactionHash'].hex(),
-            )
-        elif instance.timestamp < block['timestamp']:
+            instance = License.objects.create(product=product, license_id=event['args']['licenseID'].decode(),
+                                              timestamp=0)
+        if instance.timestamp < block['timestamp']:
             instance.product = product
             instance.license_id = event['args']['licenseID'].decode()
             instance.license_name = event['args']['licenseName'].decode()
@@ -45,22 +60,20 @@ def handle_license(event: EventData, block: BlockData, product: LicenseProduct):
             instance.additional_data = event['args']['additionalData'].decode()
             instance.tx = event['transactionHash'].hex(),
             instance.state = BlockchainState.REGISTERED
+        handle_additional_data(instance, event)
         instance.save()
     elif EventType.from_name(event['event']) == EventType.LICENSE_REVOKED:
         instance = License.objects.filter(product__id=product.id,
                                           license_id=event['args']['licenseID'].decode()).first()
         if instance is None:
             logger.warning('Unexpected case')
-            instance = License.objects.create(
-                product=product,
-                license_id=event['args']['licenseID'].decode(),
-                license_name=event['args']['licenseName'].decode(),
-                state=BlockchainState.REVOKED,
-                timestamp=block['timestamp']
-            )
+            instance = License.objects.create(product=product, license_id=event['args']['licenseID'].decode(),
+                                              timestamp=0)
         elif instance.timestamp < block['timestamp']:
             instance.state = BlockchainState.REVOKED
             instance.timestamp = block['timestamp']
+
+        handle_additional_data(instance, event)
         instance.save()
 
 
@@ -72,16 +85,9 @@ def handle_requirement(event: EventData, block: BlockData, product: LicenseProdu
             .first()
         if instance is None:
             instance = LicenseRequirements.objects.create(
-                product=product,
-                license_id=event['args']['licenseID'].decode(),
-                requirement_id=event['args']['requirementID'].decode(),
-                requirement_name=event['args']['requirementName'].decode(),
-                additional_data=event['args']['additionalData'].decode(),
-                state=BlockchainState.REGISTERED,
-                timestamp=block['timestamp'],
-                tx=event['transactionHash'].hex()
-            )
-        elif instance.timestamp < block['timestamp']:
+                product=product, license_id=event['args']['licenseID'].decode(),
+                requirement_id=event['args']['requirementID'].decode(), timestamp=0)
+        if instance.timestamp < block['timestamp']:
             instance.product = product
             instance.license_id = event['args']['licenseID'].decode()
             instance.requirement_id = event['args']['requirementID'].decode()
@@ -90,6 +96,13 @@ def handle_requirement(event: EventData, block: BlockData, product: LicenseProdu
             instance.state = BlockchainState.REGISTERED
             instance.timestamp = block['timestamp']
             instance.tx = event['transactionHash'].hex()
+            license_instance, _ = License.objects.get_or_create(
+                product__id=product.id,
+                license_id=event['args']['licenseID'].decode()
+            )
+            instance.license_obj = license_instance
+
+        handle_additional_data(instance, event)
         instance.save()
     elif EventType.from_name(event['event']) == EventType.REQUIREMENT_REVOKED:
         instance = License.objects.filter(product__id=product.id,
@@ -104,9 +117,16 @@ def handle_requirement(event: EventData, block: BlockData, product: LicenseProdu
                 state=BlockchainState.REVOKED,
                 timestamp=block['timestamp']
             )
+            license_instance, _ = License.objects.get_or_create(
+                product__id=product.id,
+                license_id=event['args']['licenseID'].decode()
+            )
+            instance.license_obj = license_instance
         elif instance.timestamp < block['timestamp']:
             instance.state = BlockchainState.REVOKED
             instance.timestamp = block['timestamp']
+
+        handle_additional_data(instance, event)
         instance.save()
 
 
@@ -115,20 +135,14 @@ def handle_evidence(event: EventData, block: BlockData, product: LicenseProduct)
         instance = Evidence.objects.filter(product__id=product.id,
                                            license_id=event['args']['licenseID'].decode(),
                                            requirement_id=event['args']['requirementID'].decode(),
-                                           evidence_id=event['args']['evidenceID']
+                                           evidence_id=event['args']['evidenceID'].decode()
                                            ).first()
         if instance is None:
             instance = Evidence.objects.create(
-                product=product,
-                license_id=event['args']['licenseID'].decode(),
+                product=product, license_id=event['args']['licenseID'].decode(),
                 requirement_id=event['args']['requirementID'].decode(),
-                evidence_id=event['args']['evidenceID'].decode(),
-                timestamp=block['timestamp'],
-                additional_data=event['args']['additionalData'].decode(),
-                state=BlockchainState.REGISTERED,
-                tx=event['transactionHash'].hex()
-            )
-        elif instance.timestamp < block['timestamp']:
+                evidence_id=event['args']['evidenceID'].decode(), timestamp=0)
+        if instance.timestamp < block['timestamp']:
             instance.product = product
             instance.license_id = event['args']['licenseID'].decode()
             instance.requirement_id = event['args']['requirementID'].decode()
@@ -137,12 +151,21 @@ def handle_evidence(event: EventData, block: BlockData, product: LicenseProduct)
             instance.additional_data = event['args']['additionalData'].decode()
             instance.state = BlockchainState.REGISTERED,
             instance.tx = event['transactionHash'].hex()
+            req_instance, _ = LicenseRequirements.objects.get_or_create(
+                product__id=product.id,
+                license_id=event['args']['licenseID'].decode(),
+                requirement_id=event['args']['requirementID'].decode()
+            )
+            instance.requirement_obj = req_instance
+
+        handle_additional_data(instance, event)
+        handle_evidence_kv(instance, event)
         instance.save()
     elif EventType.from_name(event['event']) == EventType.EVIDENCE_REVOKED:
         instance = License.objects.filter(product__id=product.id,
                                           license_id=event['args']['licenseID'].decode(),
                                           requirement_id=event['args']['requirementID'].decode(),
-                                          evidence_id=event['args']['evidenceID']).first()
+                                          evidence_id=event['args']['evidenceID'].decode()).first()
         if instance is None:
             logger.warning('Unexpected case')
             instance = Evidence.objects.create(
@@ -153,8 +176,33 @@ def handle_evidence(event: EventData, block: BlockData, product: LicenseProduct)
                 state=BlockchainState.REVOKED,
                 timestamp=block['timestamp']
             )
+            req_instance, _ = LicenseRequirements.objects.get_or_create(
+                product__id=product.id,
+                license_id=event['args']['licenseID'].decode(),
+                requirement_id=event['args']['requirementID'].decode()
+            )
+            instance.requirement_obj = req_instance
         elif instance.timestamp < block['timestamp']:
             instance.state = BlockchainState.REVOKED
+            instance.timestamp = block['timestamp']
+
+        handle_additional_data(instance, event)
+        instance.save()
+
+
+def handle_set_data(event: EventData, block: BlockData, product: LicenseProduct):
+    if EventType.from_name(event['event']) == EventType.SET_DATA:
+        instance = KV.objects.filter(product__id=product.id, key=event['args']['key'].decode()).first()
+        if instance is None:
+            instance = KV.objects.create(
+                product=product,
+                key=event['args']['key'].decode(),
+                value=event['args']['value'].decode(),
+                timestamp=block['timestamp'],
+                tx=event['transactionHash'].hex()
+            )
+        elif instance.timestamp < block['timestamp']:
+            instance.value = event['args']['value'].decode()
             instance.timestamp = block['timestamp']
         instance.save()
 
@@ -205,10 +253,13 @@ def handle_event(event: EventData, block: BlockData, product: LicenseProduct):
         instance.requirement_id = event['args']['requirementID'].decode()
         instance.evidence_id = event['args']['evidenceID'].decode()
         instance.additional_data = event['args']['additionalData'].decode()
+    if instance.log_type != EventType.SET_DATA:
+        handle_additional_data(instance, event)
     instance.save()
     handle_license(event, block, product)
     handle_requirement(event, block, product)
     handle_evidence(event, block, product)
+    handle_set_data(event, block, product)
 
 
 def handle_register_product_event(event):
