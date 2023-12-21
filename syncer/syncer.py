@@ -105,7 +105,7 @@ def handle_requirement(event: EventData, block: BlockData, product: LicenseProdu
         handle_additional_data(instance, event)
         instance.save()
     elif EventType.from_name(event['event']) == EventType.REQUIREMENT_REVOKED:
-        instance = License.objects.filter(product__id=product.id,
+        instance = LicenseRequirements.objects.filter(product__id=product.id,
                                           license_id=event['args']['licenseID'].decode(),
                                           requirement_id=event['args']['requirementID'].decode()).first()
         if instance is None:
