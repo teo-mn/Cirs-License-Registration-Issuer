@@ -23,9 +23,9 @@ class RemoveRequirementHandler(RegisterHandler):
                 logging.error('Error occurred: ' + str(id))
                 logging.error(error)
                 logging.has_error = True
+                self.error_msg = error
                 return False
-            else:
-                logging.info('[requirement] Revoked on blockchain with tx: ' + str(tx))
+            logging.info('[requirement] Revoked on blockchain with tx: ' + str(tx))
             self.data['state'] = 1
             self.instance.data = json.dumps(self.data)
             self.instance.save()

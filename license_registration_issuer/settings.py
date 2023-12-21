@@ -213,3 +213,10 @@ ISSUER_PK = env.get_value('ISSUER_PK', str, '')
 GRAPHENE = {
     "SCHEMA": "syncer.schema.schema"
 }
+
+# CALLBACK
+CALLBACK_USERNAME = env.get_value('CALLBACK_USERNAME', str, 'tiouser')
+CALLBACK_PASSWORD = env.get_value('CALLBACK_PASSWORD', str, 'tiouser')
+CALLBACK_COMMAND = env.get_value('CALLBACK_COMMAND', str, 'saveTioResponse')
+
+LICENSE_FRONTEND_URL = env.get_value('LICENSE_FRONTEND_URL', str, 'https://certify.mn/licenses')

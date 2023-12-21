@@ -7,12 +7,15 @@ from celery import shared_task
 from blockchain.issuer import Issuer
 from license_registration_issuer.models import Request
 from license_registration_issuer.settings import CELERY_TASK_DEFAULT_QUEUE, CELERY_TASK_DEFAULT_EXCHANGE, NODE_URL, \
-    LICENSE_REGISTRATION_ADDRESS, REQUIREMENT_REGISTRATION_ADDRESS, KV_ADDRESS, ISSUER_ADDRESS, ISSUER_PK
+    LICENSE_REGISTRATION_ADDRESS, REQUIREMENT_REGISTRATION_ADDRESS, KV_ADDRESS, ISSUER_ADDRESS, ISSUER_PK, \
+    CALLBACK_USERNAME, CALLBACK_PASSWORD, CALLBACK_COMMAND, LICENSE_FRONTEND_URL
 from license_registration_issuer.tasks.utils import employee_data_convert
 
 
 class RegisterHandler:
     has_error = False
+    error_msg = ''
+    qr_url = ''
 
     def __init__(self, request_id: str):
         self.issuer = Issuer(node_url=NODE_URL,
@@ -45,6 +48,7 @@ class RegisterHandler:
             )
             if error != '' and error is not None:
                 self.has_error = True
+                self.error_msg = error
                 logging.error('Error occurred: ' + str(id))
                 logging.error(error)
                 return
@@ -69,14 +73,11 @@ class RegisterHandler:
             )
             if error != '' and error is not None:
                 self.has_error = True
+                self.error_msg = error
                 logging.error('Error occurred: ' + str(id))
                 logging.error(error)
-            else:
-                logging.info('[requirement] Issued on blockchain with tx: ' + str(tx))
-                data['state'] = 1
-                self.instance.data = json.dumps(data)
-                self.instance.save()
-
+                return
+            logging.info('[requirement] Issued on blockchain with tx: ' + str(tx))
             req['state'] = 1
             self.instance.data = json.dumps(data)
             self.instance.save()
@@ -88,11 +89,18 @@ class RegisterHandler:
             x = {
                 'request_id': str(self.instance.id),
                 'payload': self.data,
-                'has_error': self.has_error
+                'has_error': self.has_error,
+                'error_msg': str(self.error_msg),
+                'qr_url': self.qr_url
             }
-            requests.post(self.instance.callback_url, json.dumps(x), )
+            y = {
+                'username': CALLBACK_USERNAME,
+                'password': CALLBACK_PASSWORD,
+                'command': CALLBACK_COMMAND,
+                'parameters': x,
+            }
             headers = {"Content-Type": "application/json"}
-            requests.request("POST", self.instance.callback_url, headers=headers, data=json.dumps(x))
+            requests.post(self.instance.callback_url, headers=headers, data=json.dumps(y))
         return
 
     def issue_employee(self, employee: dict, license_id: str, requirement_id: str):
@@ -102,11 +110,11 @@ class RegisterHandler:
             tx, error = self.issuer.set_data(secret_hash, info, ISSUER_ADDRESS, ISSUER_PK)
             if error != '' and error is not None:
                 self.has_error = True
+                self.error_msg = error
                 logging.error('Error occurred: ' + str(id))
                 logging.error(error)
                 return False
-            else:
-                logging.info('[kv] Issued on blockchain with tx: ' + str(tx))
+            logging.info('[kv] Issued on blockchain with tx: ' + str(tx))
             tx, error = self.issuer.set_evidence(
                 license_id,
                 requirement_id,
@@ -118,10 +126,10 @@ class RegisterHandler:
             if error != '' and error is not None:
                 logging.error('Error occurred: ' + str(id))
                 logging.error(error)
+                self.error_msg = error
                 self.has_error = True
                 return False
-            else:
-                logging.info('[evidence] Issued on blockchain with tx: ' + str(tx))
+            logging.info('[evidence] Issued on blockchain with tx: ' + str(tx))
             employee['state'] = 1
             self.instance.data = json.dumps(self.data)
             self.instance.save()
@@ -135,6 +143,7 @@ class RegisterHandler:
             self.issue_requirement(req)
             for emp in req['employees']:
                 self.issue_employee(emp, self.data['license_id'], req['requirement_id'])
+        self.qr_url = LICENSE_FRONTEND_URL + '/' + LICENSE_REGISTRATION_ADDRESS + '/' + self.data['license_id']
         self.handle_callback()
 
 
