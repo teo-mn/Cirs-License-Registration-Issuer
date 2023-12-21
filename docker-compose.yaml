@@ -41,5 +41,5 @@ services:
     command:
       sh -c "/code/run_celery.sh"
 
-  networks:
-    license-vpc:
+networks:
+  license-vpc:

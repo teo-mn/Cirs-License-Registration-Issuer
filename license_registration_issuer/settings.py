@@ -29,11 +29,11 @@ DEBUG = env.get_value('DEBUG', bool, False)
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = env.get_value('SECRET_KEY', str, 'django-insecure-b6%@==j2_fn&mga5b!=u*u$6y@7*as&d5tw1!8ue*lp_x=*c0p')
 # SECURITY WARNING: don't run with debug turned on in production!
-ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', list, ['*'])
-CSRF_TRUSTED_ORIGINS = env.list('CSRF_TRUSTED_ORIGINS', list, [])
+ALLOWED_HOSTS = env.list('ALLOWED_HOSTS')
+CSRF_TRUSTED_ORIGINS = env.list('CSRF_TRUSTED_ORIGINS')
 
 # CORS
-# CORS_ALLOWED_ORIGINS = env.list('CORS_ALLOWED_ORIGINS', list, ['*'])
+CORS_ALLOWED_ORIGINS = env.list('CORS_ALLOWED_ORIGINS')
 CORS_ALLOW_CREDENTIALS = True
 CORS_ORIGIN_ALLOW_ALL = True
 # CORS_ORIGIN_WHITELIST = env.list('CORS_ORIGIN_WHITELIST', list, ['*'])
