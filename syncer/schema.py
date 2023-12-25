@@ -186,7 +186,8 @@ class QueryRequirements(graphene.ObjectType):
 class EvidenceDetailNode(graphene.ObjectType):
     evidences = graphene.relay.ConnectionField(EvidenceConnection, license_type=graphene.String())
     # requirements = graphene.List(RequirementNode, license_id=graphene.String(required=True))
-    logs = graphene.relay.ConnectionField(LogConnection, from_ts=graphene.Int(), to_ts=graphene.Int())
+    logs = graphene.relay.ConnectionField(LogConnection, from_ts=graphene.Int(), to_ts=graphene.Int(),
+                                          log_type=graphene.String())
 
     def resolve_evidences(self, info, license_type='', first=0, last=0, before=None, after=None):
         if self['evidence_id'] is None or self['evidence_id'] == '':
@@ -203,7 +204,7 @@ class EvidenceDetailNode(graphene.ObjectType):
                 requirement_obj__license_obj__state=BlockchainState.REVOKED)
         return query
 
-    def resolve_logs(self, info, from_ts=0, to_ts=0, first=0, last=0, before=None, after=None):
+    def resolve_logs(self, info, from_ts=0, to_ts=0, log_type='', first=0, last=0, before=None, after=None):
         if self['evidence_id'] is None or self['evidence_id'] == '':
             return []
         query = EventLog.objects.filter(product__license_address=self['license_address'],
@@ -212,6 +213,8 @@ class EvidenceDetailNode(graphene.ObjectType):
             query = query.filter(timestamp__gte=from_ts)
         if to_ts > 0:
             query = query.filter(timestamp__lte=to_ts)
+        if log_type != '':
+            query.filter(log_type=log_type)
         return query.order_by('-timestamp')
 
 
@@ -226,10 +229,10 @@ class QueryEvidences(graphene.ObjectType):
 class Query(QueryProducts, QueryLicenses, QueryRequirements, QueryEvidences):
     logs = graphene.relay.ConnectionField(LogConnection, license_address=graphene.String(required=True),
                                           license_id=graphene.String(required=True),
-                                          from_ts=graphene.Int(), to_ts=graphene.Int())
+                                          from_ts=graphene.Int(), to_ts=graphene.Int(), log_type=graphene.String())
     last_synced_block_number = graphene.Field(LatestSyncedBlockNode)
 
-    def resolve_logs(self, info, license_address, license_id, from_ts=0, to_ts=0,
+    def resolve_logs(self, info, license_address, license_id, from_ts=0, to_ts=0, log_type='',
                      first=0, last=0, before=None, after=None):
         query = EventLog.objects.filter(product__license_address=license_address) \
             .filter(license_id=license_id)
@@ -237,6 +240,8 @@ class Query(QueryProducts, QueryLicenses, QueryRequirements, QueryEvidences):
             query = query.filter(timestamp__gte=from_ts)
         if to_ts > 0:
             query = query.filter(timestamp__lte=to_ts)
+        if log_type != '':
+            query.filter(log_type=log_type)
         return query.order_by('-timestamp')
 
     def resolve_last_synced_block_number(self, info):
