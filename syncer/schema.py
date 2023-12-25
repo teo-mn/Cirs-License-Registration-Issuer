@@ -230,6 +230,7 @@ class Query(QueryProducts, QueryLicenses, QueryRequirements, QueryEvidences):
     logs = graphene.relay.ConnectionField(LogConnection, license_address=graphene.String(required=True),
                                           license_id=graphene.String(required=True),
                                           from_ts=graphene.Int(), to_ts=graphene.Int(), log_type=graphene.String())
+    kv = graphene.Field(KVNode, license_address=graphene.String(required=True), key=graphene.String(required=True))
     last_synced_block_number = graphene.Field(LatestSyncedBlockNode)
 
     def resolve_logs(self, info, license_address, license_id, from_ts=0, to_ts=0, log_type='',
@@ -246,6 +247,9 @@ class Query(QueryProducts, QueryLicenses, QueryRequirements, QueryEvidences):
 
     def resolve_last_synced_block_number(self, info):
         return LatestSyncedBlock.objects.first()
+
+    def resolve_kv(self, info, license_address, key):
+        return KV.objects.get(product__license_address=license_address, key=key)
 
 
 schema = graphene.Schema(query=Query)
