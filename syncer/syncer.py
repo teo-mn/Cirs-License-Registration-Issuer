@@ -48,7 +48,7 @@ def handle_license(event: EventData, block: BlockData, product: LicenseProduct):
         if instance is None:
             instance = License.objects.create(product=product, license_id=event['args']['licenseID'].decode(),
                                               timestamp=0)
-        if instance.timestamp < block['timestamp']:
+        if instance.timestamp <= block['timestamp']:
             instance.product = product
             instance.license_id = event['args']['licenseID'].decode()
             instance.license_name = event['args']['licenseName'].decode()
@@ -69,7 +69,7 @@ def handle_license(event: EventData, block: BlockData, product: LicenseProduct):
             logger.warning('Unexpected case')
             instance = License.objects.create(product=product, license_id=event['args']['licenseID'].decode(),
                                               timestamp=0)
-        elif instance.timestamp < block['timestamp']:
+        elif instance.timestamp <= block['timestamp']:
             instance.state = BlockchainState.REVOKED
             instance.timestamp = block['timestamp']
 
@@ -87,7 +87,7 @@ def handle_requirement(event: EventData, block: BlockData, product: LicenseProdu
             instance = LicenseRequirements.objects.create(
                 product=product, license_id=event['args']['licenseID'].decode(),
                 requirement_id=event['args']['requirementID'].decode(), timestamp=0)
-        if instance.timestamp < block['timestamp']:
+        if instance.timestamp <= block['timestamp']:
             instance.product = product
             instance.license_id = event['args']['licenseID'].decode()
             instance.requirement_id = event['args']['requirementID'].decode()
@@ -122,7 +122,7 @@ def handle_requirement(event: EventData, block: BlockData, product: LicenseProdu
                 license_id=event['args']['licenseID'].decode()
             )
             instance.license_obj = license_instance
-        elif instance.timestamp < block['timestamp']:
+        elif instance.timestamp <= block['timestamp']:
             instance.state = BlockchainState.REVOKED
             instance.timestamp = block['timestamp']
 
@@ -142,7 +142,7 @@ def handle_evidence(event: EventData, block: BlockData, product: LicenseProduct)
                 product=product, license_id=event['args']['licenseID'].decode(),
                 requirement_id=event['args']['requirementID'].decode(),
                 evidence_id=event['args']['evidenceID'].decode(), timestamp=0)
-        if instance.timestamp < block['timestamp']:
+        if instance.timestamp <= block['timestamp']:
             instance.product = product
             instance.license_id = event['args']['licenseID'].decode()
             instance.requirement_id = event['args']['requirementID'].decode()
@@ -182,7 +182,7 @@ def handle_evidence(event: EventData, block: BlockData, product: LicenseProduct)
                 requirement_id=event['args']['requirementID'].decode()
             )
             instance.requirement_obj = req_instance
-        elif instance.timestamp < block['timestamp']:
+        elif instance.timestamp <= block['timestamp']:
             instance.state = BlockchainState.REVOKED
             instance.timestamp = block['timestamp']
 
@@ -201,7 +201,7 @@ def handle_set_data(event: EventData, block: BlockData, product: LicenseProduct)
                 timestamp=block['timestamp'],
                 tx=event['transactionHash'].hex()
             )
-        elif instance.timestamp < block['timestamp']:
+        elif instance.timestamp <= block['timestamp']:
             instance.value = event['args']['value'].decode()
             instance.timestamp = block['timestamp']
         instance.save()
