@@ -214,7 +214,7 @@ class EvidenceDetailNode(graphene.ObjectType):
         if to_ts > 0:
             query = query.filter(timestamp__lte=to_ts)
         if log_type != '':
-            query.filter(log_type=log_type)
+            query = query.filter(log_type=log_type)
         return query.order_by('-timestamp')
 
 
@@ -242,7 +242,7 @@ class Query(QueryProducts, QueryLicenses, QueryRequirements, QueryEvidences):
         if to_ts > 0:
             query = query.filter(timestamp__lte=to_ts)
         if log_type != '':
-            query.filter(log_type=log_type)
+            query = query.filter(log_type=log_type)
         return query.order_by('-timestamp')
 
     def resolve_last_synced_block_number(self, info):
