@@ -184,12 +184,13 @@ class QueryRequirements(graphene.ObjectType):
 
 
 class EvidenceDetailNode(graphene.ObjectType):
-    evidences = graphene.relay.ConnectionField(EvidenceConnection, license_type=graphene.String())
+    evidences = graphene.relay.ConnectionField(EvidenceConnection, license_type=graphene.String(),
+                                               search=graphene.String(required=False))
     # requirements = graphene.List(RequirementNode, license_id=graphene.String(required=True))
     logs = graphene.relay.ConnectionField(LogConnection, from_ts=graphene.Int(), to_ts=graphene.Int(),
                                           log_type=graphene.String())
 
-    def resolve_evidences(self, info, license_type='', first=0, last=0, before=None, after=None):
+    def resolve_evidences(self, info, license_type='', search='', first=0, last=0, before=None, after=None):
         if self['evidence_id'] is None or self['evidence_id'] == '':
             return []
         query = Evidence.objects.filter(product__license_address=self['license_address'],
@@ -202,6 +203,12 @@ class EvidenceDetailNode(graphene.ObjectType):
             query = query.filter(
                 requirement_obj__state=BlockchainState.REVOKED,
                 requirement_obj__license_obj__state=BlockchainState.REVOKED)
+        if search is not None and search != '':
+            query = query.filter(
+                Q(license_id__icontains=search) |
+                Q(requirement_obj__license_obj__owner_id__icontains=search) |
+                Q(requirement_obj__license_obj__owner_name__icontains=search)
+            )
         return query
 
     def resolve_logs(self, info, from_ts=0, to_ts=0, log_type='', first=0, last=0, before=None, after=None):
