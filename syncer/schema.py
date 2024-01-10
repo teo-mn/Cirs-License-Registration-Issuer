@@ -1,9 +1,40 @@
+import time
+
 import graphene
 from django.db.models import Q
 from graphene_django import DjangoObjectType
 
 from syncer.models import LicenseProduct, License, Evidence, LicenseRequirements, EventLog, KV, LatestSyncedBlock, \
     BlockchainState
+
+
+def get_display_state_license(instance: License):
+    if instance.state == BlockchainState.REVOKED:
+        return "REVOKED"
+    ts = int(time.time())
+    if instance.end_date < ts:
+        return "EXPIRED"
+    elif instance.state == BlockchainState.REGISTERED:
+        return "REGISTERED"
+    return ""
+
+
+def get_display_state_requirement(instance: LicenseRequirements):
+    parent_state = get_display_state_license(instance.license_obj)
+    if instance.state == BlockchainState.REVOKED:
+        return instance.state
+    if parent_state == BlockchainState.REGISTERED:
+        return instance.state
+    return parent_state
+
+
+def get_display_state_evidence(instance: Evidence):
+    parent_state = get_display_state_requirement(instance.requirement_obj)
+    if instance.state == BlockchainState.REVOKED:
+        return instance.state
+    if parent_state == BlockchainState.REGISTERED:
+        return instance.state
+    return parent_state
 
 
 class LatestSyncedBlockNode(DjangoObjectType):
@@ -41,11 +72,16 @@ class KVNode(DjangoObjectType):
 
 
 class EvidenceNode(DjangoObjectType):
+    state = graphene.String()
+
     class Meta:
         model = Evidence
         interfaces = (graphene.relay.Node,)
-        fields = ("id", "evidence_id", "tx", "timestamp", "state", "license_id", "requirement_id",
+        fields = ("id", "evidence_id", "tx", "timestamp", "license_id", "requirement_id",
                   "product", "additional_data", "additional_data_kv", "evidence_kv", "requirement_obj")
+
+    def resolve_state(self, info):
+        return get_display_state_evidence(self)
 
 
 class EvidenceConnection(graphene.relay.Connection):
@@ -60,17 +96,22 @@ class EvidenceConnection(graphene.relay.Connection):
 
 class RequirementNode(DjangoObjectType):
     evidences = graphene.List(EvidenceNode)
+    state = graphene.String()
 
     class Meta:
         model = LicenseRequirements
         interfaces = (graphene.relay.Node,)
-        fields = ("id", "tx", "timestamp", "requirement_id", "requirement_name", "state", "evidences",
+        fields = ("id", "tx", "timestamp", "requirement_id", "requirement_name", "evidences",
                   "license_id", "product", "additional_data", "additional_data_kv", "license_obj")
 
     def resolve_evidences(self, info):
         return Evidence.objects.filter(requirement_id=self.requirement_id,
                                        license_id=self.license_id,
-                                       product__id=self.product.id)
+                                       product__id=self.product.id,
+                                       state=BlockchainState.REGISTERED)
+
+    def resolve_state(self, info):
+        return get_display_state_requirement(self)
 
 
 class RequirementConnection(graphene.relay.Connection):
@@ -85,16 +126,20 @@ class RequirementConnection(graphene.relay.Connection):
 
 class LicenseNode(DjangoObjectType):
     requirements = graphene.relay.ConnectionField(RequirementConnection)
+    state = graphene.String()
 
     class Meta:
         model = License
         interfaces = (graphene.relay.Node,)
-        fields = ("id", "tx", "state", "license_id", "license_name", "owner_id", "owner_name",
+        fields = ("id", "tx", "license_id", "license_name", "owner_id", "owner_name",
                   "start_date", "end_date", "additional_data", "timestamp", "product", "additional_data",
                   "additional_data_kv")
 
     def resolve_requirements(self, info, first=0, last=0, before=None, after=None):
         return LicenseRequirements.objects.filter(license_id=self.license_id, product__id=self.product.id)
+
+    def resolve_state(self, info):
+        return get_display_state_license(self)
 
 
 class LicenseConnection(graphene.relay.Connection):
