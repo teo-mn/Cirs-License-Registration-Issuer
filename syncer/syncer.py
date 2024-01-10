@@ -231,6 +231,16 @@ def handle_event(event: EventData, block: BlockData, product: LicenseProduct):
         instance.start_date = event['args']['startDate']
         instance.end_date = event['args']['endDate']
         instance.additional_data = event['args']['additionalData'].decode()
+        if EventLog.objects.filter(product__id=product.id,
+                                   log_type=EventType.LICENSE_REGISTERED,
+                                   license_id=event['args']['licenseID'].decode(),
+                                   timestamp__lt=block['timestamp']).count() > 0:
+            instance.log_type = EventType.LICENSE_UPDATED
+        for x in EventLog.objects.filter(product__id=product.id,
+                                         log_type=EventType.LICENSE_REGISTERED,
+                                         license_id=event['args']['licenseID'].decode(),
+                                         timestamp__gt=block['timestamp']).all():
+            x.log_type = EventType.LICENSE_UPDATED
     elif instance.log_type == EventType.LICENSE_REVOKED:
         instance.license_id = event['args']['licenseID'].decode()
         instance.additional_data = event['args']['additionalData'].decode()
