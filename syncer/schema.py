@@ -240,14 +240,20 @@ class EvidenceDetailNode(graphene.ObjectType):
             return []
         query = Evidence.objects.filter(product__license_address=self['license_address'],
                                         evidence_id=self['evidence_id'])
+
+        ts = int(time.time())
         if license_type == 'REGISTERED':
             query = query.filter(
+                state=BlockchainState.REGISTERED,
                 requirement_obj__state=BlockchainState.REGISTERED,
-                requirement_obj__license_obj__state=BlockchainState.REGISTERED)
+                requirement_obj__license_obj__state=BlockchainState.REGISTERED,
+                requirement_obj__license_obj__end_date__gte=ts)
         if license_type == 'REVOKED':
             query = query.filter(
-                requirement_obj__state=BlockchainState.REVOKED,
-                requirement_obj__license_obj__state=BlockchainState.REVOKED)
+                Q(state=BlockchainState.REVOKED) | Q(requirement_obj__state=BlockchainState.REVOKED) | Q(
+                    requirement_obj__license_obj__state=BlockchainState.REVOKED) | Q(
+                    requirement_obj__license_obj__end_date__lt=ts)
+            )
         if search is not None and search != '':
             query = query.filter(
                 Q(license_id__icontains=search) |

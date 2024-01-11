@@ -162,10 +162,10 @@ def handle_evidence(event: EventData, block: BlockData, product: LicenseProduct)
         handle_evidence_kv(instance, event)
         instance.save()
     elif EventType.from_name(event['event']) == EventType.EVIDENCE_REVOKED:
-        instance = License.objects.filter(product__id=product.id,
-                                          license_id=event['args']['licenseID'].decode(),
-                                          requirement_id=event['args']['requirementID'].decode(),
-                                          evidence_id=event['args']['evidenceID'].decode()).first()
+        instance = Evidence.objects.filter(product__id=product.id,
+                                           license_id=event['args']['licenseID'].decode(),
+                                           requirement_id=event['args']['requirementID'].decode(),
+                                           evidence_id=event['args']['evidenceID'].decode()).first()
         if instance is None:
             logger.warning('Unexpected case')
             instance = Evidence.objects.create(
@@ -279,7 +279,7 @@ def handle_register_product_event(event):
             license_address=event['args']['license_address'],
             requirement_address=event['args']['requirement_address'],
             kv_address=event['args']['kv_address'],
-            name=event['args']['name'].decode(),
+            name=event['args']['name'].decode()
         )
     else:
         instance = LicenseProduct.objects.get(license_address=event['args']['license_address'])
