@@ -12,3 +12,4 @@ graphene_django==3.1.5
 graphene~=3.3
 django-cors-headers==4.3.1
 mysqlclient==2.2.0
+redis==4.4.0
