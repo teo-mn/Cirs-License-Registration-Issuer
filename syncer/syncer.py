@@ -14,6 +14,13 @@ from syncer.models import EventLog, EventType, LicenseProduct, LatestSyncedBlock
 logger = logging.getLogger(__name__)
 
 
+def handle_tx_hash(tx):
+    tx_hex = tx.hex()
+    if tx_hex.startswith('0x') or tx_hex == '':
+        return tx_hex
+    return '0x' + tx_hex
+
+
 def handle_additional_data(instance, event: EventData):
     kv = KV.objects.filter(product__id=instance.product.id, key=event['args']['additionalData'].decode()).first()
     if kv is None:
@@ -58,7 +65,7 @@ def handle_license(event: EventData, block: BlockData, product: LicenseProduct):
             instance.end_date = event['args']['endDate']
             instance.timestamp = block['timestamp']
             instance.additional_data = event['args']['additionalData'].decode()
-            instance.tx = event['transactionHash'].hex()
+            instance.tx = handle_tx_hash(event['transactionHash'])
             instance.state = BlockchainState.REGISTERED
         handle_additional_data(instance, event)
         instance.save()
@@ -95,7 +102,7 @@ def handle_requirement(event: EventData, block: BlockData, product: LicenseProdu
             instance.additional_data = event['args']['additionalData'].decode()
             instance.state = BlockchainState.REGISTERED
             instance.timestamp = block['timestamp']
-            instance.tx = event['transactionHash'].hex()
+            instance.tx = handle_tx_hash(event['transactionHash'])
             license_instance, _ = License.objects.get_or_create(
                 product__id=product.id,
                 license_id=event['args']['licenseID'].decode()
@@ -150,7 +157,7 @@ def handle_evidence(event: EventData, block: BlockData, product: LicenseProduct)
             instance.timestamp = block['timestamp']
             instance.additional_data = event['args']['additionalData'].decode()
             instance.state = BlockchainState.REGISTERED
-            instance.tx = event['transactionHash'].hex()
+            instance.tx = handle_tx_hash(event['transactionHash'])
             req_instance, _ = LicenseRequirements.objects.get_or_create(
                 product__id=product.id,
                 license_id=event['args']['licenseID'].decode(),
@@ -199,7 +206,7 @@ def handle_set_data(event: EventData, block: BlockData, product: LicenseProduct)
                 key=event['args']['key'].decode(),
                 value=event['args']['value'].decode(),
                 timestamp=block['timestamp'],
-                tx=event['transactionHash'].hex()
+                tx=handle_tx_hash(event['transactionHash'])
             )
         elif instance.timestamp <= block['timestamp']:
             instance.value = event['args']['value'].decode()
@@ -208,14 +215,14 @@ def handle_set_data(event: EventData, block: BlockData, product: LicenseProduct)
 
 
 def handle_event(event: EventData, block: BlockData, product: LicenseProduct):
-    if EventLog.objects.filter(product__id=product.id, tx=event['transactionHash'].hex(),
+    if EventLog.objects.filter(product__id=product.id, tx=handle_tx_hash(event['transactionHash']),
                                log_type=EventType.from_name(event['event'])).count() > 0:
-        instance = EventLog.objects.get(product__id=product.id, tx=event['transactionHash'].hex(),
+        instance = EventLog.objects.get(product__id=product.id, tx=handle_tx_hash(event['transactionHash']),
                                         log_type=EventType.from_name(event['event']))
     else:
         instance = EventLog.objects.create(
             product=product,
-            tx=event['transactionHash'].hex(),
+            tx=handle_tx_hash(event['transactionHash']),
             block_number=block['number'],
             log_type=EventType.from_name(event['event']),
             timestamp=block['timestamp']
