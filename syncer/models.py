@@ -99,6 +99,7 @@ class License(models.Model):
     owner_name = models.CharField(max_length=1024, default='', blank=True)
     additional_data = models.CharField(max_length=1024, default='', blank=True)
     additional_data_kv = models.ForeignKey(KV, on_delete=models.CASCADE, null=True)
+    additional_data_json = models.JSONField(default=dict)
     start_date = models.IntegerField(default=0)
     end_date = models.IntegerField(default=0)
     state = models.CharField(

@@ -43,6 +43,11 @@ RegisterSchema = {
           "description": "Блокчэйнд бичсэн эсэх төлөв. 0 бол бичээгүй, 1 бол бичсэн. 1 үед дахин бичихгүй",
           "default": 0
         },
+        "is_consulting": {
+          "type": "boolean",
+          "description": "Зөвлөх үйлчилгээ мөн эсэх",
+          "default": False
+        },
         "requirements": {
           "type": "array",
           "description": "Заалтуудын мэдээллэл",

@@ -1,3 +1,4 @@
+import json
 import logging
 
 from web3 import Web3
@@ -65,6 +66,11 @@ def handle_license(event: EventData, block: BlockData, product: LicenseProduct):
             instance.end_date = event['args']['endDate']
             instance.timestamp = block['timestamp']
             instance.additional_data = event['args']['additionalData'].decode()
+            try:
+                instance.additional_data_json = json.loads(instance.additional_data)
+            except json.decoder.JSONDecodeError:
+                logging.error('Failed to decode additional data json: ' + instance.additional_data)
+
             instance.tx = handle_tx_hash(event['transactionHash'])
             instance.state = BlockchainState.REGISTERED
         handle_additional_data(instance, event)
@@ -380,7 +386,7 @@ class BlockSyncer:
         self.connect_web3()
         from_block = self.get_last_synced_block() + 1
         to_block = self.get_latest_block()
-        logger.info('Syncer starting from block: ' + str(to_block))
+        logger.info('Syncer starting from block: ' + str(from_block - 1))
         while from_block <= to_block:
             x = min(from_block + 1000, to_block)
             self.sync_new_block_range(from_block, x)

@@ -1,5 +1,6 @@
 import json
 import logging
+from urllib.response import addinfo
 
 import requests
 from celery import shared_task
@@ -35,6 +36,8 @@ class RegisterHandler:
         data = self.data
         if data['state'] == 0:
             logging.info('[license] Issuing id: ' + data['license_id'])
+            add_data = {'d': data['license_system_id'] if 'description' not in data else data['description'],
+                        'is_c': 1 if data['is_consulting'] else 0}
             tx, error = self.issuer.register_license(
                 data['license_id'],
                 data['license_type'],
@@ -42,7 +45,7 @@ class RegisterHandler:
                 data['owner_name'],
                 data['start_date'],
                 data['end_date'],
-                data['license_system_id'] if 'description' not in data else data['description'],
+                json.dumps(add_data),
                 ISSUER_ADDRESS,
                 ISSUER_PK
             )

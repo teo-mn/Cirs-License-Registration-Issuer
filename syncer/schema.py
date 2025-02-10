@@ -132,7 +132,7 @@ class LicenseNode(DjangoObjectType):
         model = License
         interfaces = (graphene.relay.Node,)
         fields = ("id", "tx", "license_id", "license_name", "owner_id", "owner_name",
-                  "start_date", "end_date", "additional_data", "timestamp", "product", "additional_data",
+                  "start_date", "end_date", "additional_data", "timestamp", "product", "additional_data_json",
                   "additional_data_kv")
 
     def resolve_requirements(self, info, first=0, last=0, before=None, after=None):
