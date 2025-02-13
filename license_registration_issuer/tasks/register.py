@@ -37,7 +37,7 @@ class RegisterHandler:
         if data['state'] == 0:
             logging.info('[license] Issuing id: ' + data['license_id'])
             add_data = {'d': data['license_system_id'] if 'description' not in data else data['description'],
-                        'is_c': 1 if data['is_consulting'] else 0}
+                        'is_c': 1 if data['is_consulting'] == "1" else 0}
             tx, error = self.issuer.register_license(
                 data['license_id'],
                 data['license_type'],

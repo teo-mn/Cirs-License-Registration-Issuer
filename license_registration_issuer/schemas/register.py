@@ -44,9 +44,10 @@ RegisterSchema = {
           "default": 0
         },
         "is_consulting": {
-          "type": "boolean",
+          # "type": "boolean",
+          "enum": ["1", "0"],
           "description": "Зөвлөх үйлчилгээ мөн эсэх",
-          "default": False
+          "default": "0"
         },
         "requirements": {
           "type": "array",
