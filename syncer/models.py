@@ -58,7 +58,7 @@ class KV(models.Model):
     updated_at = models.DateTimeField(auto_now=True, null=True)
     key = models.CharField(max_length=1024, default='', blank=True)
     value = models.CharField(max_length=1024, default='', blank=True)
-    timestamp = models.IntegerField(default=0)
+    timestamp = models.BigIntegerField(default=0)
     tx = models.CharField(max_length=128, default='')
 
 
@@ -72,13 +72,13 @@ class EventLog(models.Model):
         choices=EventType.choices,
         max_length=32)
     block_number = models.IntegerField()
-    timestamp = models.IntegerField()
+    timestamp = models.BigIntegerField()
     license_id = models.CharField(max_length=1024, default='', blank=True)
     license_name = models.CharField(max_length=1024, default='', blank=True)
     owner_id = models.CharField(max_length=1024, default='', blank=True)
     owner_name = models.CharField(max_length=1024, default='', blank=True)
-    start_date = models.IntegerField(default=0)
-    end_date = models.IntegerField(default=0)
+    start_date = models.BigIntegerField(default=0)
+    end_date = models.BigIntegerField(default=0)
     additional_data = models.CharField(max_length=1024, default='', blank=True)
     additional_data_kv = models.ForeignKey(KV, on_delete=models.CASCADE, null=True)
     requirement_id = models.CharField(max_length=1024, default='', blank=True)
@@ -100,13 +100,13 @@ class License(models.Model):
     additional_data = models.CharField(max_length=1024, default='', blank=True)
     additional_data_kv = models.ForeignKey(KV, on_delete=models.CASCADE, null=True)
     additional_data_json = models.JSONField(default=dict)
-    start_date = models.IntegerField(default=0)
-    end_date = models.IntegerField(default=0)
+    start_date = models.BigIntegerField(default=0)
+    end_date = models.BigIntegerField(default=0)
     state = models.CharField(
         choices=BlockchainState.choices,
         max_length=32)
     tx = models.CharField(max_length=128)
-    timestamp = models.IntegerField(default=0)
+    timestamp = models.BigIntegerField(default=0)
 
 
 class LicenseRequirements(models.Model):
@@ -123,7 +123,7 @@ class LicenseRequirements(models.Model):
         choices=BlockchainState.choices,
         max_length=32)
     tx = models.CharField(max_length=128)
-    timestamp = models.IntegerField(default=0)
+    timestamp = models.BigIntegerField(default=0)
     license_obj = models.ForeignKey(License, on_delete=models.CASCADE, null=True)
 
 
@@ -140,7 +140,7 @@ class Evidence(models.Model):
     additional_data = models.CharField(max_length=1024, default='', blank=True)
     additional_data_kv = models.ForeignKey(KV, on_delete=models.CASCADE, null=True)
     evidence_kv = models.ForeignKey(KV, on_delete=models.CASCADE, null=True, related_name='evidence_kv')
-    timestamp = models.IntegerField(default=0)
+    timestamp = models.BigIntegerField(default=0)
     tx = models.CharField(max_length=128, default='')
     state = models.CharField(
         choices=BlockchainState.choices,
